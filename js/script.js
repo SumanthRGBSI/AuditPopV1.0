@@ -1,168 +1,282 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // --- Audit View Tab Logic ---
-    const auditViewPage = document.getElementById('audit-view-page');
+    let updateTimeout;
+    let overallScoreChart, scoreByChapterChart;
+
+    // --- Main View Tab Logic ---
     const viewTabs = document.getElementById('view-tabs');
+    const mainContentContainer = document.querySelector('#audit-view-page .pt-6');
 
     viewTabs.addEventListener('click', (e) => {
         const tabButton = e.target.closest('.view-tab-btn');
-        if (!tabButton || tabButton.dataset.target === '#') return;
+        if (!tabButton) return;
 
         viewTabs.querySelectorAll('.view-tab-btn').forEach(btn => {
-            btn.classList.remove('text-blue-600', 'border-blue-600');
+            btn.classList.remove('text-indigo-600', 'border-indigo-600');
             btn.classList.add('text-gray-500', 'border-transparent');
         });
-        tabButton.classList.add('text-blue-600', 'border-blue-600');
+        tabButton.classList.add('text-indigo-600', 'border-indigo-600');
 
         const targetId = tabButton.dataset.target;
-        auditViewPage.querySelectorAll('.view-tab-content').forEach(content => {
-            content.classList.add('hidden');
+        mainContentContainer.querySelectorAll('.view-tab-content').forEach(content => {
+            content.classList[content.id === targetId ? 'remove' : 'add']('hidden');
         });
-        const targetContent = document.getElementById(targetId);
-        if(targetContent) {
-            targetContent.classList.remove('hidden');
-        }
-
-        if (targetId === 'view-score-details') {
-            setupScoreCharts();
-        }
+        updateAllConnectedTabs();
     });
 
-    // --- Assessment Phase Tab Logic ---
-    const assessmentPhaseTabs = document.getElementById('assessment-phase-tabs');
-    assessmentPhaseTabs.addEventListener('click', (e) => {
-        const phaseButton = e.target.closest('.assessment-phase-btn');
-        if (!phaseButton) return;
+    // --- DEMO DATA ---
+    const demoData = { "q1.1": { supplierScore: 3, auditorScore: 3, auditorComment: "All exits are clear and well-lit. Excellent." }, "q1.2": { supplierScore: 3, auditorScore: 2, auditorComment: "Log indicates maintenance was due last week for extinguishers on the west wall.", findings: [{ name: "Extinguisher maintenance overdue", type: "Area for Improvement" }] }, "q1.3": { supplierScore: 2, auditorScore: 1, auditorComment: "First aid kit in assembly area is missing bandages and antiseptic wipes.", findings: [{ name: "Incomplete first aid kit", type: "Non-Conformance" }] }, "q1.4": { supplierScore: 3, auditorScore: 3, auditorComment: "Drill logs are up to date and routes are clearly posted." }, "q2.1": { supplierScore: 2, auditorScore: 1, auditorComment: "Guard on lathe #3 is cracked and has been temporarily repaired with duct tape.", findings: [{ name: "Cracked machine guard", type: "Non-Conformance" }, { name: "Improper guard repair", type: "Non-Conformance" }] }, "q2.2": { supplierScore: 3, auditorScore: 3, auditorComment: "Observed proper LOTO procedure during maintenance of the conveyor belt." }, "q2.3": { supplierScore: 3, auditorScore: 2, auditorComment: "E-stop on the main press is partially obstructed by a waste bin." , findings: [{ name: "Obstructed E-stop button", type: "Area for Improvement" }] }, "q3.1": { supplierScore: 3, auditorScore: 3, auditorComment: "Digital SDS database is easily accessible from all workstations." }, "q3.2": { supplierScore: 2, auditorScore: 2, auditorComment: "Secondary containment for the main chemical storage is adequate, but a temporary drum storage area lacks it.", findings: [{ name: "Lack of secondary containment for temporary storage", type: "Area for Improvement" }] }, "q4.1": { supplierScore: 3, auditorScore: 2, auditorComment: "Panel 4B has pallets stored within the 3-foot clearance zone.", findings: [{ name: "Obstructed electrical panel", type: "Non-Conformance" }] }, "q4.2": { supplierScore: 2, auditorScore: 1, auditorComment: "Extension cord running to the ventilation fan is frayed near the plug.", findings: [{ name: "Frayed extension cord in use", type: "Non-Conformance" }] },};
+    const auditQuestions = {
+        "chapter-1": { title: "Emergency Preparedness", questions: [ "Are emergency exits clearly marked and unobstructed?", "Is fire extinguisher maintenance up to date?", "Are first aid kits readily available and fully stocked?", "Are evacuation routes clearly posted and drills conducted regularly?", "Is there a designated and known emergency assembly point?" ]},
+        "chapter-2": { title: "Machine Guarding & Safety", questions: [ "Are all rotating parts and pinch points on machinery properly guarded?", "Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?", "Are emergency stop buttons easily accessible and functional?", "Have operators received specific training for the machinery they use?", "Are regular safety inspections of machinery documented?" ]},
+        "chapter-3": { title: "Chemical Safety & Handling", questions: [ "Are Safety Data Sheets (SDS) readily accessible for all hazardous chemicals?", "Is secondary containment used for liquid chemical storage areas?", "Are employees trained on the facility's Hazard Communication program?", "Is appropriate Personal Protective Equipment (PPE) available and used for chemical handling?", "Are chemical storage areas well-ventilated and labeled correctly?" ]},
+        "chapter-4": { title: "Electrical Safety", questions: [ "Are electrical panels clear and unobstructed for at least 3 feet?", "Are flexible cords and cables free from damage or fraying?", "Is GFCI protection used in wet or damp locations?", "Are extension cords used only for temporary purposes and not as permanent wiring?", "Are all portable electrical tools in good condition and properly grounded?" ]}
+    };
 
-        assessmentPhaseTabs.querySelectorAll('.assessment-phase-btn').forEach(btn => {
-            btn.classList.remove('text-blue-600', 'border-blue-600');
-            btn.classList.add('text-gray-500', 'border-transparent');
+    function createQuestionHTML(chapterNum, questionNum, questionText, data) {
+        const qId = `q${chapterNum}.${questionNum}`;
+        const hasData = !!data;
+        const supplierScoreCheck = (val) => hasData && data.supplierScore === val ? 'checked' : '';
+        const auditorScoreCheck = (val) => hasData && data.auditorScore === val ? 'checked' : '';
+        const auditorComment = hasData ? data.auditorComment || '' : '';
+        let findingsHTML = '<div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>';
+        if (hasData && data.findings && data.findings.length > 0) {
+            findingsHTML = data.findings.map(finding => `<div class="finding-row bg-white p-2 border rounded-md flex items-center gap-3"><input type="text" class="finding-name flex-grow p-1.5 border-0 rounded-md text-sm focus:ring-1 focus:ring-indigo-500" value="${finding.name}" placeholder="Finding Name..."><select class="finding-type p-1.5 border-0 rounded-md text-sm bg-transparent focus:ring-1 focus:ring-indigo-500"><option value="">Select Type</option><option ${finding.type === 'Area for Improvement' ? 'selected' : ''}>Area for Improvement</option><option ${finding.type === 'Non-Conformance' ? 'selected' : ''}>Non-Conformance</option></select><div class="text-gray-400 space-x-2"><button class="hover:text-indigo-600"><i class="fas fa-paperclip"></i></button><button class="hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></div></div>`).join('');
+        }
+        return `<div class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" data-question-id="${qId}" data-question-text="${questionText}"><div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center"><h4 class="font-semibold text-gray-800 pr-4">${chapterNum}.${questionNum} - ${questionText}</h4><span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">Score: <b class="score-display text-gray-700 font-bold">N/A</b></span></div><div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="space-y-4"><div class="grid grid-cols-2 gap-6"><div><label class="text-sm font-semibold text-gray-700">Supplier Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div><div><label class="text-sm font-semibold text-gray-700">Auditor Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div></div><div><label class="text-sm font-semibold text-gray-700">Supplier Comments</label><textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea></div><div><label class="text-sm font-semibold text-gray-700 flex items-center justify-between"><span>Auditor Comments</span><span class="text-gray-400 space-x-3"><i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i><i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i></span></label><textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments...">${auditorComment}</textarea></div></div><div><h5 class="font-semibold text-gray-800 mb-2">Findings</h5><div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">${findingsHTML}</div><button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div>`;
+    }
+
+    for (const chapterKey in auditQuestions) {
+        const chapterNum = chapterKey.split('-')[1];
+        const chapterElement = document.getElementById(chapterKey);
+        const questions = auditQuestions[chapterKey].questions;
+        questions.forEach((qText, index) => {
+            const qNum = index + 1;
+            const qId = `q${chapterNum}.${qNum}`;
+            const data = demoData[qId];
+            chapterElement.innerHTML += createQuestionHTML(chapterNum, qNum, qText, data);
         });
-        phaseButton.classList.add('text-blue-600', 'border-blue-600');
+    }
 
-        document.querySelectorAll('.assessment-phase').forEach(phase => {
-            phase.classList.remove('active');
-            phase.classList.add('hidden');
+    const assessmentContent = document.getElementById('assessment-content');
+    if (assessmentContent) {
+         assessmentContent.addEventListener('click', function(e) {
+            const addBtn = e.target.closest('.add-finding-btn');
+            if (addBtn) {
+                const findingsContent = addBtn.previousElementSibling;
+                if (findingsContent.querySelector('.text-center')) findingsContent.innerHTML = '';
+                const newFindingHTML = `<div class="finding-row bg-white p-2 border rounded-md flex items-center gap-3"><input type="text" class="finding-name flex-grow p-1.5 border-0 rounded-md text-sm focus:ring-1 focus:ring-indigo-500" placeholder="Finding Name..."><select class="finding-type p-1.5 border-0 rounded-md text-sm bg-transparent focus:ring-1 focus:ring-indigo-500"><option value="">Select Type</option><option>Area for Improvement</option><option>Non-Conformance</option></select><div class="text-gray-400 space-x-2"><button class="hover:text-indigo-600"><i class="fas fa-paperclip"></i></button><button class="hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></div></div>`;
+                findingsContent.insertAdjacentHTML('beforeend', newFindingHTML);
+                updateAllConnectedTabs();
+            }
+            const removeBtn = e.target.closest('.remove-finding-btn');
+            if (removeBtn) {
+                const row = removeBtn.closest('.finding-row');
+                const findingsContent = row.parentElement;
+                row.remove();
+                if (findingsContent.children.length === 0) findingsContent.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>';
+                updateAllConnectedTabs();
+            }
         });
-        const targetPhase = document.getElementById(`phase-${phaseButton.dataset.phase}`);
-        if (targetPhase) {
-            targetPhase.classList.add('active');
-            targetPhase.classList.remove('hidden');
+
+        assessmentContent.addEventListener('input', function(e) {
+            const target = e.target;
+            let shouldUpdate = false;
+
+            if (target.matches('input[type="radio"][name$="_score"]')) {
+                updateScorePill(target);
+                shouldUpdate = true;
+            } else if (target.matches('.auditor-comment, .finding-name, .finding-type')) {
+                shouldUpdate = true;
+            }
+
+            if (shouldUpdate) {
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(updateAllConnectedTabs, 500);
+            }
+        });
+    }
+
+    function updateScorePill(radioElement) {
+        const qContainer = radioElement.closest('.question-container');
+        const scorePill = qContainer.querySelector('.score-pill');
+        const scoreDisplay = qContainer.querySelector('.score-display');
+        const selectedRadio = qContainer.querySelector(`input[name$="_score"]:checked`);
+        if (selectedRadio) {
+            const score = selectedRadio.value;
+            scoreDisplay.textContent = score;
+            scorePill.className = 'score-pill text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap';
+            if (score === '1') scorePill.classList.add('bg-red-100', 'text-red-800');
+            else if (score === '2') scorePill.classList.add('bg-orange-100', 'text-orange-800');
+            else if (score === '3') scorePill.classList.add('bg-green-100', 'text-green-800');
+        } else {
+            scoreDisplay.textContent = 'N/A';
+            scorePill.className = 'score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap';
         }
-    });
+    }
 
-    // --- Inline Finding Management ---
-    document.getElementById('view-assessment').addEventListener('click', function(e) {
-        const addBtn = e.target.closest('.add-finding-btn');
-        const removeBtn = e.target.closest('.remove-finding-btn');
-
-        if (addBtn) {
-            const tableBody = addBtn.previousElementSibling.querySelector('tbody');
-            const newRow = document.createElement('tr');
-            const rowCount = tableBody.rows.length + 1;
-            newRow.innerHTML = `
-                <td class="py-1 pr-2">${rowCount}</td>
-                <td class="p-1"><input type="text" class="w-full p-1 border rounded-md"></td>
-                <td class="p-1">
-                    <select class="w-full p-1 border rounded-md">
-                        <option>Area for Improvement</option>
-                        <option>Non-Conformance</option>
-                    </select>
-                </td>
-                <td class="py-1 pl-2 text-center">
-                    <button class="text-gray-500 hover:text-blue-600"><i class="fas fa-paperclip"></i></button>
-                    <button class="text-gray-500 hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
-            tableBody.appendChild(newRow);
-        }
-
-        if (removeBtn) {
-            const row = removeBtn.closest('tr');
-            const tableBody = row.parentElement;
-            row.remove();
-            Array.from(tableBody.rows).forEach((r, index) => {
-                r.cells[0].textContent = index + 1;
-            });
-        }
-    });
-
-    // --- CHAPTER NAVIGATION AND SCROLL-SPY ---
     const chapterNav = document.getElementById('chapter-nav');
     const chapterSections = document.querySelectorAll('.chapter-section');
-
     if(chapterNav) {
         chapterNav.addEventListener('click', (e) => {
             const link = e.target.closest('a');
             if (!link) return;
             e.preventDefault();
-            const targetId = link.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            const targetElement = document.querySelector(link.getAttribute('href'));
+            if (targetElement) window.scrollTo({ top: targetElement.getBoundingClientRect().top + window.pageYOffset - 150, behavior: "smooth" });
         });
     }
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             const id = entry.target.getAttribute('id');
             const navLink = chapterNav.querySelector(`a[href="#${id}"]`);
-            if (entry.isIntersecting) {
+            if (entry.isIntersecting && navLink) {
                 chapterNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
-                if (navLink) {
-                    navLink.classList.add('active');
-                }
+                navLink.classList.add('active');
             }
         });
-    }, {
-        rootMargin: "-40% 0px -60% 0px",
-        threshold: 0
-    });
+    }, { rootMargin: "-40% 0px -60% 0px", threshold: 0 });
+    if (chapterSections.length > 0) chapterSections.forEach(section => { observer.observe(section); });
 
-    if (chapterSections.length > 0) {
-         chapterSections.forEach(section => {
-            observer.observe(section);
-        });
-    }
-
-    // --- CHAPTER PROGRESS BAR LOGIC ---
-    const updateChapterProgress = () => {
+    function updateChapterProgress() {
         if (!chapterNav) return;
         chapterSections.forEach(section => {
             const chapterId = section.getAttribute('id');
             const questions = section.querySelectorAll('.question-container');
-            const totalQuestions = questions.length;
-
-            let answeredQuestions = 0;
+            let answered = 0, findingsCount = 0;
             questions.forEach(q => {
-                if (q.querySelector('input[type="radio"]:checked')) {
-                    answeredQuestions++;
-                }
+                if (q.querySelector('input[name$="_score"]:checked')) answered++;
+                findingsCount += q.querySelectorAll('.finding-row').length;
             });
-
-            const percentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
-
+            const percentage = questions.length > 0 ? (answered / questions.length) * 100 : 0;
             const navTile = chapterNav.querySelector(`.chapter-tile[href="#${chapterId}"]`);
             if (navTile) {
-                const progressBar = navTile.querySelector('.progress-bar');
-                const progressText = navTile.querySelector('.progress-text');
-
-                if (progressBar) progressBar.style.width = `${percentage}%`;
-                if (progressText) progressText.textContent = `${answeredQuestions}/${totalQuestions} Qs`;
+                navTile.querySelector('.progress-bar').style.width = `${percentage}%`;
+                navTile.querySelector('.progress-text').textContent = `${answered}/${questions.length} Qs`;
+                navTile.querySelector('.findings-count').innerHTML = `Findings: <b>${findingsCount}</b>`;
             }
         });
     };
 
-    updateChapterProgress(); // Initial Update
+    function getAuditData() {
+        const data = [];
+        document.querySelectorAll('.chapter-section').forEach((chap, i) => {
+            const chapterNum = i + 1;
+            const chapterData = { id: `chapter-${chapterNum}`, title: auditQuestions[`chapter-${chapterNum}`].title, questions: [], score: 0, maxScore: 0, findingsCount: 0 };
+            chap.querySelectorAll('.question-container').forEach(q => {
+                const scoreRadio = q.querySelector('input[name$="_score"]:checked');
+                const questionData = { id: q.dataset.questionId, text: q.dataset.questionText, score: scoreRadio ? parseInt(scoreRadio.value) : 0, maxScore: 3, comment: q.querySelector('.auditor-comment').value, findings: [] };
+                q.querySelectorAll('.finding-row').forEach(f => {
+                    const name = f.querySelector('.finding-name').value;
+                    const type = f.querySelector('.finding-type').value;
+                    if (name && type) {
+                        questionData.findings.push({ name, type });
+                        chapterData.findingsCount++;
+                    }
+                });
+                if (scoreRadio) {
+                    chapterData.score += questionData.score;
+                    chapterData.maxScore += questionData.maxScore;
+                }
+                chapterData.questions.push(questionData);
+            });
+            data.push(chapterData);
+        });
+        return data;
+    }
 
-    const assessmentContent = document.getElementById('assessment-content');
-    if (assessmentContent) {
-        assessmentContent.addEventListener('change', (e) => {
-            if (e.target.matches('input[type="radio"]')) {
-                updateChapterProgress();
+    function generateScoreAndDetailsTab() {
+        const auditData = getAuditData();
+        let totalScore = 0, totalMaxScore = 0;
+        const breakdownBody = document.querySelector('#score-breakdown-table tbody');
+        breakdownBody.innerHTML = '';
+        const chapterScores = auditData.map(chapter => {
+            totalScore += chapter.score;
+            totalMaxScore += chapter.maxScore;
+            const percentage = chapter.maxScore > 0 ? ((chapter.score / chapter.maxScore) * 100).toFixed(0) : 0;
+            breakdownBody.innerHTML += `<tr class="border-b"><td class="p-3 font-medium">${chapter.title}</td><td class="p-3">${chapter.score}</td><td class="p-3">${chapter.maxScore}</td><td class="p-3 font-semibold">${percentage}%</td><td class="p-3">${chapter.findingsCount}</td></tr>`;
+            return percentage;
+        });
+        const overallPercentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(0) : 0;
+        document.getElementById('overallScoreText').textContent = `${overallPercentage}%`;
+        const overallCtx = document.getElementById('overallScoreChart').getContext('2d');
+        if (overallScoreChart) overallScoreChart.destroy();
+        overallScoreChart = new Chart(overallCtx, { type: 'doughnut', data: { datasets: [{ data: [overallPercentage, 100 - overallPercentage], backgroundColor: ['#4f46e5', '#e5e7eb'], borderWidth: 0, borderRadius: 5 }] }, options: { responsive: true, cutout: '80%', plugins: { tooltip: { enabled: false } } } });
+        const chapterCtx = document.getElementById('scoreByChapterChart').getContext('2d');
+        if (scoreByChapterChart) scoreByChapterChart.destroy();
+        scoreByChapterChart = new Chart(chapterCtx, { type: 'bar', data: { labels: auditData.map(c => c.title), datasets: [{ label: 'Score %', data: chapterScores, backgroundColor: ['#818cf8', '#6366f1', '#4f46e5', '#4338ca'], borderRadius: 4, maxBarThickness: 30 }] }, options: { responsive: true, indexAxis: 'y', scales: { x: { max: 100, beginAtZero: true } }, plugins: { legend: { display: false } } } });
+    }
+
+    function generateFindingsActionsTab() {
+        const auditData = getAuditData();
+        const tableBody = document.getElementById('findings-action-table-body');
+        tableBody.innerHTML = '';
+        let totalFindings = 0, openFindings = 0, overdueFindings = 0;
+        auditData.forEach(chapter => {
+            chapter.questions.forEach(q => {
+                q.findings.forEach(f => {
+                    totalFindings++;
+                    openFindings++;
+                    const isOverdue = Math.random() > 0.8;
+                    if (isOverdue) overdueFindings++;
+                    const typeClass = f.type === 'Non-Conformance' ? 'status-non-conformance' : 'status-area-for-improvement';
+                    const statusClass = isOverdue ? 'status-overdue' : 'status-open';
+                    tableBody.innerHTML += `<tr class="border-t cursor-pointer hover:bg-gray-50 finding-nav-row" data-question-id="${q.id}"><td class="p-4 font-medium">${f.name}<br><small class="text-gray-500">From ${q.id.toUpperCase()}</small></td><td class="p-4"><span class="status-pill ${typeClass}">${f.type}</span></td><td class="p-4 ${isOverdue ? 'text-red-600' : ''}">2025-10-25</td><td class="p-4"><span class="status-pill ${statusClass}">${isOverdue ? 'Overdue' : 'Open'}</span></td><td class="p-4"><button class="text-indigo-600 font-semibold manage-finding-btn">Manage</button></td></tr>`;
+                });
+            });
+        });
+        document.getElementById('total-findings-count').textContent = totalFindings;
+        document.getElementById('open-findings-count').textContent = openFindings - overdueFindings;
+        document.getElementById('overdue-findings-count').textContent = overdueFindings;
+    }
+
+    function generateReportTab() {
+        const auditData = getAuditData();
+        const reportContent = document.getElementById('report-content');
+        reportContent.innerHTML = '';
+        auditData.forEach(chapter => {
+            let questionsHTML = '';
+            chapter.questions.forEach(q => {
+                if (q.score > 0 || q.comment || q.findings.length > 0) {
+                     questionsHTML += `<div class="p-4 border-t"><p class="font-medium">${q.id.toUpperCase()} - ${q.text}</p><div class="mt-2 pl-4 text-sm space-y-2"><p><strong>Score:</strong> ${q.score} / ${q.maxScore}</p>${q.comment ? `<p><strong>Comments:</strong> ${q.comment}</p>` : ''}${q.findings.length > 0 ? `<div><p><strong>Findings:</strong></p><ul class="list-disc pl-5 mt-1 text-gray-700">${q.findings.map(f => `<li>${f.name} (${f.type})</li>`).join('')}</ul></div>` : ''}</div></div>`;
+                }
+            });
+            if (questionsHTML) {
+                reportContent.innerHTML += `<div class="border rounded-lg overflow-hidden"><h4 class="font-semibold p-3 bg-gray-100">${chapter.title}</h4>${questionsHTML}</div>`;
             }
         });
     }
+
+    function updateAllConnectedTabs() {
+        updateChapterProgress();
+        const activeTab = document.querySelector('.view-tab-btn.text-indigo-600');
+        if (!activeTab) return;
+        const targetId = activeTab.dataset.target;
+        if (targetId === 'view-score-details') generateScoreAndDetailsTab();
+        else if (targetId === 'view-findings-actions') generateFindingsActionsTab();
+        else if (targetId === 'view-report') generateReportTab();
+    }
+
+    const findingsActionTab = document.getElementById('view-findings-actions');
+    findingsActionTab.addEventListener('click', (e) => {
+        const row = e.target.closest('.finding-nav-row');
+        if (!row) return;
+
+        if (e.target.closest('.manage-finding-btn')) {
+            openModal('manageFindingModal');
+            return;
+        }
+
+        const questionId = row.dataset.questionId;
+        document.querySelector('.view-tab-btn[data-target="view-assessment"]').click();
+        setTimeout(() => {
+            const questionElement = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
+            if (questionElement) {
+                questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                questionElement.classList.add('highlight-question');
+                setTimeout(() => questionElement.classList.remove('highlight-question'), 2500);
+            }
+        }, 100);
+    });
 
     // --- Modal Logic ---
     const openModal = (modalId) => {
@@ -195,36 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setupFindingModalTabs();
 
-    // --- Score Charts ---
-    let overallScoreChart, scoreByGroupChart;
-    const setupScoreCharts = () => {
-        const overallCtx = document.getElementById('overallScoreChart');
-        const overallScore = 55;
-        document.getElementById('overallScoreText').textContent = `${overallScore}%`;
-
-        if (overallCtx) {
-            if (overallScoreChart) overallScoreChart.destroy();
-            overallScoreChart = new Chart(overallCtx, {
-                type: 'doughnut',
-                data: { datasets: [{ data: [overallScore, 100 - overallScore], backgroundColor: ['#2563eb', '#e5e7eb'], borderWidth: 0, borderRadius: 5 }] },
-                options: { responsive: true, cutout: '80%', plugins: { tooltip: { enabled: false } } }
-            });
-        }
-
-        const groupByCtx = document.getElementById('scoreByGroupChart');
-        if (groupByCtx) {
-            if(scoreByGroupChart) scoreByGroupChart.destroy();
-            scoreByGroupChart = new Chart(groupByCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Emergency Prep', 'Machine Guarding', 'Chemical Safety', 'Electrical Safety'],
-                    datasets: [{ label: 'Score %', data: [67, 25, 83, 33], backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8'], borderRadius: 4, maxBarThickness: 30 }]
-                },
-                options: { responsive: true, indexAxis: 'y', scales: { x: { max: 100, beginAtZero: true } }, plugins: { legend: { display: false } } }
-            });
-        }
-    };
-
     // --- 5 Whys Logic in Modal ---
     const whysContainer = document.getElementById('5-whys-container');
     const addWhyBtn = document.getElementById('addWhyBtn');
@@ -235,9 +319,9 @@ document.addEventListener('DOMContentLoaded', function() {
         whyCount++;
         const whyBlock = `
             <div class="flex items-start space-x-2 why-block">
-                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 font-bold rounded-full flex items-center justify-center text-sm">Why?</div>
+                <div class="flex-shrink-0 w-10 h-10 bg-indigo-100 text-indigo-700 font-bold rounded-full flex items-center justify-center text-sm">Why?</div>
                 <div class="flex-grow">
-                    <textarea class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Because..."></textarea>
+                    <textarea class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" rows="2" placeholder="Because..."></textarea>
                 </div>
             </div>
             ${whyCount < 5 ? '<div class="h-6 w-px bg-gray-300 ml-5"></div>' : ''}
@@ -252,19 +336,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function setupFindingModalTabs() {
         const findingTabs = document.getElementById('finding-tabs');
+        if (!findingTabs) return;
         findingTabs.addEventListener('click', (e) => {
             const tabButton = e.target.closest('.finding-tab-btn');
             if (!tabButton) return;
 
             findingTabs.querySelectorAll('.finding-tab-btn').forEach(btn => {
-                btn.classList.remove('text-blue-600', 'border-blue-600');
+                btn.classList.remove('text-indigo-600', 'border-indigo-600');
                 btn.classList.add('text-gray-500', 'border-transparent');
             });
-            tabButton.classList.add('text-blue-600', 'border-blue-600');
+            tabButton.classList.add('text-indigo-600', 'border-indigo-600');
 
             const modalContent = tabButton.closest('.modal-content');
             modalContent.querySelectorAll('.finding-tab-content').forEach(content => content.classList.add('hidden'));
             document.getElementById(tabButton.dataset.target).classList.remove('hidden');
         });
     }
+
+    function initializeAuditState() {
+        document.querySelectorAll('input[name$="_score"]:checked').forEach(radio => updateScorePill(radio));
+        updateChapterProgress();
+    }
+
+    initializeAuditState();
 });
