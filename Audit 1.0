@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EHS Intelligence Platform - Audit View 9.0</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for Dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Custom styles to enhance the UI */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+        /* Custom focus rings */
+        *:focus-visible {
+            outline: 2px solid #4f46e5 !important;
+            outline-offset: 2px;
+        }
+
+        /* Chapter navigation */
+        .chapter-tile {
+            transition: all 0.2s ease-in-out;
+            border-left: 4px solid transparent;
+        }
+        .chapter-tile.active {
+            background-color: #eef2ff;
+            border-left-color: #4f46e5;
+        }
+        .chapter-tile.active .font-semibold {
+             color: #4f46e5;
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            transition: width 0.4s ease-in-out;
+        }
+        
+        /* Status Pills for visual indicators */
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .status-open { background-color: #e0f2fe; color: #0369a1; }
+        .status-overdue { background-color: #fee2e2; color: #991b1b; }
+        .status-non-conformance { background-color: #ffedd5; color: #9a3412; }
+        .status-area-for-improvement { background-color: #fef9c3; color: #854d0e; }
+        
+        /* Highlight for navigation */
+        .highlight-question {
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 0 0 2px #4f46e5, 0 0 15px rgba(79, 70, 229, 0.5);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="bg-gray-100">
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col min-h-screen">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-indigo-600"><i class="fas fa-shield-alt mr-2"></i> EHS Intelligence</h1>
+                </div>
+                 <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700"><i class="fas fa-bell"></i></button>
+                    <a href="#" class="flex items-center text-gray-600 hover:bg-gray-50 rounded-lg p-2">
+                        <img class="h-8 w-8 rounded-full object-cover" src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD" alt="User avatar">
+                        <div class="ml-3 text-left">
+                            <p class="text-sm font-medium text-gray-800">John Doe</p>
+                        </div>
+                    </a>
+                </div>
+            </header>
+
+            <div class="flex-1 p-6">
+                <!-- PAGE: Audit View -->
+                <div id="audit-view-page" class="page active">
+                    <div class="border-b border-gray-200 bg-white sticky top-16 z-10 -ml-6 -mr-6 px-6">
+                        <nav class="-mb-px flex space-x-8" id="view-tabs">
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-audit-details">View Audit</button>
+                            <button class="view-tab-btn text-indigo-600 border-b-2 border-indigo-600 py-4 px-1 text-sm font-medium" data-target="view-assessment">Assessment</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-score-details">Audit Score</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-findings-actions">Findings & Actions</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-report">Audit Report</button>
+                        </nav>
+                    </div>
+                    <div class="pt-6">
+                        <!-- Assessment Tab -->
+                        <div id="view-assessment" class="view-tab-content">
+                            <div class="bg-transparent">
+                                <div class="p-4 bg-white rounded-t-xl border-b sticky top-[128px] z-10">
+                                    <nav class="flex space-x-4" id="assessment-phase-tabs">
+                                        <button class="assessment-phase-btn font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 px-2" data-phase="onsite">Onsite Assessment</button>
+                                        <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="offsite">Offsite Assessment</button>
+                                        <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="self">Self Assessment</button>
+                                    </nav>
+                                </div>
+
+                                <div id="assessment-phases-container">
+                                    <!-- Onsite Phase -->
+                                    <div class="assessment-phase active" id="phase-onsite">
+                                        <div class="flex flex-col md:flex-row gap-8">
+                                            <!-- Left Sidebar Navigation -->
+                                            <aside class="w-full md:w-1/4 lg:w-1/5 md:sticky md:top-48 md:self-start pt-6">
+                                                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Chapters</h3>
+                                                <nav id="chapter-nav" class="space-y-1">
+                                                    <a href="#chapter-1" class="chapter-tile active group block p-3 rounded-lg hover:bg-gray-50">
+                                                        <span class="font-semibold text-gray-800 text-sm">Emergency Preparedness</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/5 Qs</span>
+                                                            <span class="findings-count text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                          <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#chapter-2" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50">
+                                                        <span class="font-semibold text-gray-800 text-sm">Machine Guarding</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/5 Qs</span>
+                                                            <span class="findings-count text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                          <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#chapter-3" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50">
+                                                        <span class="font-semibold text-gray-800 text-sm">Chemical Safety</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/5 Qs</span>
+                                                            <span class="findings-count text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                          <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                        </div>
+                                                    </a>
+                                                    <a href="#chapter-4" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50">
+                                                        <span class="font-semibold text-gray-800 text-sm">Electrical Safety</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/5 Qs</span>
+                                                            <span class="findings-count text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                          <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                        </div>
+                                                    </a>
+                                                </nav>
+                                            </aside>
+
+                                            <!-- Right Content Area -->
+                                            <div class="w-full md:w-3/4 lg:w-4/5 pt-6" id="assessment-content">
+                                                
+                                                <!-- Chapter 1 -->
+                                                <div id="chapter-1" class="chapter-section space-y-4">
+                                                    <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 1: Emergency Preparedness</h3>
+                                                </div>
+                                                
+                                                <!-- Chapter 2 -->
+                                                <div id="chapter-2" class="chapter-section space-y-4 pt-8">
+                                                    <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 2: Machine Guarding & Safety</h3>
+                                                </div>
+
+                                                <!-- Chapter 3 -->
+                                                <div id="chapter-3" class="chapter-section space-y-4 pt-8">
+                                                    <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 3: Chemical Safety & Handling</h3>
+                                                </div>
+
+                                                <!-- Chapter 4 -->
+                                                <div id="chapter-4" class="chapter-section space-y-4 pt-8">
+                                                    <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 4: Electrical Safety</h3>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Audit Tab -->
+                        <div id="view-audit-details" class="view-tab-content hidden">
+                            <div class="bg-white p-8 rounded-xl shadow-sm">
+                                <h3 class="text-xl font-semibold mb-4 text-gray-800">Audit Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-gray-600">
+                                    <p><strong>Audit ID:</strong> AUD-2025-001</p>
+                                    <p><strong>Audit Type:</strong> Supplier Audit</p>
+                                    <p><strong>Auditee:</strong> Global Innovations Inc.</p>
+                                    <p><strong>Lead Auditor:</strong> John Doe</p>
+                                    <p><strong>Request Date:</strong> 2025-09-15</p>
+                                    <p><strong>Scheduled Date:</strong> 2025-10-10</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score and Details Tab -->
+                        <div id="view-score-details" class="view-tab-content hidden">
+                           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm text-center">
+                                    <h3 class="font-semibold text-lg mb-4">Overall Score</h3>
+                                    <div class="relative w-48 h-48 mx-auto">
+                                        <canvas id="overallScoreChart"></canvas>
+                                        <div id="overallScoreText" class="absolute inset-0 flex items-center justify-center text-4xl font-bold text-indigo-600">0%</div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                                    <h3 class="font-semibold text-lg mb-4">Score by Chapter</h3>
+                                    <canvas id="scoreByChapterChart" height="150"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-lg font-semibold mb-4">Score Breakdown</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-sm" id="score-breakdown-table">
+                                        <thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase"><th class="p-3">Chapter</th><th class="p-3">Score</th><th class="p-3">Max Score</th><th class="p-3">Percentage</th><th class="p-3">Findings</th></tr></thead>
+                                        <tbody>
+                                            <!-- Dynamic content here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Findings and Actions Tab -->
+                        <div id="view-findings-actions" class="view-tab-content hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center" id="findings-summary">
+                                    <div class="p-4 bg-gray-100 rounded-lg"><h4 class="text-sm font-medium text-gray-500">Total Findings</h4><p class="text-3xl font-bold mt-1" id="total-findings-count">0</p></div>
+                                    <div class="p-4 bg-blue-100 rounded-lg"><h4 class="text-sm font-medium text-blue-700">Open</h4><p class="text-3xl font-bold mt-1 text-blue-600" id="open-findings-count">0</p></div>
+                                    <div class="p-4 bg-red-100 rounded-lg"><h4 class="text-sm font-medium text-red-700">Overdue</h4><p class="text-3xl font-bold mt-1 text-red-600" id="overdue-findings-count">0</p></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border bg-gray-50 rounded-lg">
+                                    <input type="text" placeholder="Search by keyword..." class="w-full p-2 border border-gray-300 rounded-lg md:col-span-1" id="finding-search">
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg" id="finding-status-filter"><option value="all">Status: All</option><option value="open">Open</option><option value="overdue">Overdue</option></select>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg" id="finding-type-filter"><option value="all">Type: All</option><option value="Non-Conformance">Non-Conformance</option><option value="Area for Improvement">Area for Improvement</option></select>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-sm">
+                                        <thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase"><th class="p-4">Finding</th><th class="p-4">Type</th><th class="p-4">Due Date</th><th class="p-4">Status</th></tr></thead>
+                                        <tbody id="findings-action-table-body">
+                                            <!-- Dynamic content here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Tab -->
+                        <div id="view-report" class="view-tab-content hidden">
+                           <div class="bg-white p-8 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-center border-b pb-4 mb-6">
+                                    <div>
+                                        <h3 class="text-2xl font-bold">Audit Report</h3>
+                                        <p class="text-gray-500">AUD-2025-001: Supplier Audit</p>
+                                    </div>
+                                    <button onclick="window.print()" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700"><i class="fas fa-print mr-2"></i> Print Report</button>
+                                </div>
+                                <div id="report-content" class="space-y-6">
+                                    <!-- Dynamic report content here -->
+                                </div>
+                           </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let updateTimeout;
+            let overallScoreChart, scoreByChapterChart;
+
+            // --- Main View Tab Logic ---
+            const viewTabs = document.getElementById('view-tabs');
+            const mainContentContainer = document.querySelector('#audit-view-page .pt-6');
+            
+            viewTabs.addEventListener('click', (e) => {
+                const tabButton = e.target.closest('.view-tab-btn');
+                if (!tabButton) return;
+
+                viewTabs.querySelectorAll('.view-tab-btn').forEach(btn => {
+                    btn.classList.remove('text-indigo-600', 'border-indigo-600');
+                    btn.classList.add('text-gray-500', 'border-transparent');
+                });
+                tabButton.classList.add('text-indigo-600', 'border-indigo-600');
+                
+                const targetId = tabButton.dataset.target;
+                mainContentContainer.querySelectorAll('.view-tab-content').forEach(content => {
+                    content.classList[content.id === targetId ? 'remove' : 'add']('hidden');
+                });
+                updateAllConnectedTabs();
+            });
+
+            // --- DEMO DATA ---
+            const demoData = { "q1.1": { supplierScore: 3, auditorScore: 3, auditorComment: "All exits are clear and well-lit. Excellent." }, "q1.2": { supplierScore: 3, auditorScore: 2, auditorComment: "Log indicates maintenance was due last week for extinguishers on the west wall.", findings: [{ name: "Extinguisher maintenance overdue", type: "Area for Improvement" }] }, "q1.3": { supplierScore: 2, auditorScore: 1, auditorComment: "First aid kit in assembly area is missing bandages and antiseptic wipes.", findings: [{ name: "Incomplete first aid kit", type: "Non-Conformance" }] }, "q1.4": { supplierScore: 3, auditorScore: 3, auditorComment: "Drill logs are up to date and routes are clearly posted." }, "q2.1": { supplierScore: 2, auditorScore: 1, auditorComment: "Guard on lathe #3 is cracked and has been temporarily repaired with duct tape.", findings: [{ name: "Cracked machine guard", type: "Non-Conformance" }, { name: "Improper guard repair", type: "Non-Conformance" }] }, "q2.2": { supplierScore: 3, auditorScore: 3, auditorComment: "Observed proper LOTO procedure during maintenance of the conveyor belt." }, "q2.3": { supplierScore: 3, auditorScore: 2, auditorComment: "E-stop on the main press is partially obstructed by a waste bin." , findings: [{ name: "Obstructed E-stop button", type: "Area for Improvement" }] }, "q3.1": { supplierScore: 3, auditorScore: 3, auditorComment: "Digital SDS database is easily accessible from all workstations." }, "q3.2": { supplierScore: 2, auditorScore: 2, auditorComment: "Secondary containment for the main chemical storage is adequate, but a temporary drum storage area lacks it.", findings: [{ name: "Lack of secondary containment for temporary storage", type: "Area for Improvement" }] }, "q4.1": { supplierScore: 3, auditorScore: 2, auditorComment: "Panel 4B has pallets stored within the 3-foot clearance zone.", findings: [{ name: "Obstructed electrical panel", type: "Non-Conformance" }] }, "q4.2": { supplierScore: 2, auditorScore: 1, auditorComment: "Extension cord running to the ventilation fan is frayed near the plug.", findings: [{ name: "Frayed extension cord in use", type: "Non-Conformance" }] },};
+            const auditQuestions = {
+                "chapter-1": { title: "Emergency Preparedness", questions: [ "Are emergency exits clearly marked and unobstructed?", "Is fire extinguisher maintenance up to date?", "Are first aid kits readily available and fully stocked?", "Are evacuation routes clearly posted and drills conducted regularly?", "Is there a designated and known emergency assembly point?" ]},
+                "chapter-2": { title: "Machine Guarding & Safety", questions: [ "Are all rotating parts and pinch points on machinery properly guarded?", "Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?", "Are emergency stop buttons easily accessible and functional?", "Have operators received specific training for the machinery they use?", "Are regular safety inspections of machinery documented?" ]},
+                "chapter-3": { title: "Chemical Safety & Handling", questions: [ "Are Safety Data Sheets (SDS) readily accessible for all hazardous chemicals?", "Is secondary containment used for liquid chemical storage areas?", "Are employees trained on the facility's Hazard Communication program?", "Is appropriate Personal Protective Equipment (PPE) available and used for chemical handling?", "Are chemical storage areas well-ventilated and labeled correctly?" ]},
+                "chapter-4": { title: "Electrical Safety", questions: [ "Are electrical panels clear and unobstructed for at least 3 feet?", "Are flexible cords and cables free from damage or fraying?", "Is GFCI protection used in wet or damp locations?", "Are extension cords used only for temporary purposes and not as permanent wiring?", "Are all portable electrical tools in good condition and properly grounded?" ]}
+            };
+
+            function createQuestionHTML(chapterNum, questionNum, questionText, data) {
+                const qId = `q${chapterNum}.${questionNum}`;
+                const hasData = !!data;
+                const supplierScoreCheck = (val) => hasData && data.supplierScore === val ? 'checked' : '';
+                const auditorScoreCheck = (val) => hasData && data.auditorScore === val ? 'checked' : '';
+                const auditorComment = hasData ? data.auditorComment || '' : '';
+                let findingsHTML = '<div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>';
+                if (hasData && data.findings && data.findings.length > 0) {
+                    findingsHTML = data.findings.map(finding => `<div class="finding-row bg-white p-2 border rounded-md flex items-center gap-3"><input type="text" class="finding-name flex-grow p-1.5 border-0 rounded-md text-sm focus:ring-1 focus:ring-indigo-500" value="${finding.name}" placeholder="Finding Name..."><select class="finding-type p-1.5 border-0 rounded-md text-sm bg-transparent focus:ring-1 focus:ring-indigo-500"><option value="">Select Type</option><option ${finding.type === 'Area for Improvement' ? 'selected' : ''}>Area for Improvement</option><option ${finding.type === 'Non-Conformance' ? 'selected' : ''}>Non-Conformance</option></select><div class="text-gray-400 space-x-2"><button class="hover:text-indigo-600"><i class="fas fa-paperclip"></i></button><button class="hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></div></div>`).join('');
+                }
+                return `<div class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" data-question-id="${qId}" data-question-text="${questionText}"><div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center"><h4 class="font-semibold text-gray-800 pr-4">${chapterNum}.${questionNum} - ${questionText}</h4><span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">Score: <b class="score-display text-gray-700 font-bold">N/A</b></span></div><div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="space-y-4"><div class="grid grid-cols-2 gap-6"><div><label class="text-sm font-semibold text-gray-700">Supplier Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div><div><label class="text-sm font-semibold text-gray-700">Auditor Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div></div><div><label class="text-sm font-semibold text-gray-700">Supplier Comments</label><textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea></div><div><label class="text-sm font-semibold text-gray-700 flex items-center justify-between"><span>Auditor Comments</span><span class="text-gray-400 space-x-3"><i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i><i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i></span></label><textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments...">${auditorComment}</textarea></div></div><div><h5 class="font-semibold text-gray-800 mb-2">Findings</h5><div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">${findingsHTML}</div><button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div>`;
+            }
+
+            for (const chapterKey in auditQuestions) {
+                const chapterNum = chapterKey.split('-')[1];
+                const chapterElement = document.getElementById(chapterKey);
+                const questions = auditQuestions[chapterKey].questions;
+                questions.forEach((qText, index) => {
+                    const qNum = index + 1;
+                    const qId = `q${chapterNum}.${qNum}`;
+                    const data = demoData[qId];
+                    chapterElement.innerHTML += createQuestionHTML(chapterNum, qNum, qText, data);
+                });
+            }
+
+            const assessmentContent = document.getElementById('assessment-content');
+            if (assessmentContent) {
+                 assessmentContent.addEventListener('click', function(e) {
+                    const addBtn = e.target.closest('.add-finding-btn');
+                    if (addBtn) {
+                        const findingsContent = addBtn.previousElementSibling;
+                        if (findingsContent.querySelector('.text-center')) findingsContent.innerHTML = '';
+                        const newFindingHTML = `<div class="finding-row bg-white p-2 border rounded-md flex items-center gap-3"><input type="text" class="finding-name flex-grow p-1.5 border-0 rounded-md text-sm focus:ring-1 focus:ring-indigo-500" placeholder="Finding Name..."><select class="finding-type p-1.5 border-0 rounded-md text-sm bg-transparent focus:ring-1 focus:ring-indigo-500"><option value="">Select Type</option><option>Area for Improvement</option><option>Non-Conformance</option></select><div class="text-gray-400 space-x-2"><button class="hover:text-indigo-600"><i class="fas fa-paperclip"></i></button><button class="hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></div></div>`;
+                        findingsContent.insertAdjacentHTML('beforeend', newFindingHTML);
+                        updateAllConnectedTabs();
+                    }
+                    const removeBtn = e.target.closest('.remove-finding-btn');
+                    if (removeBtn) {
+                        const row = removeBtn.closest('.finding-row');
+                        const findingsContent = row.parentElement;
+                        row.remove();
+                        if (findingsContent.children.length === 0) findingsContent.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>';
+                        updateAllConnectedTabs();
+                    }
+                });
+
+                assessmentContent.addEventListener('input', function(e) {
+                    const target = e.target;
+                    let shouldUpdate = false;
+
+                    if (target.matches('input[type="radio"][name$="_score"]')) {
+                        updateScorePill(target);
+                        shouldUpdate = true;
+                    } else if (target.matches('.auditor-comment, .finding-name, .finding-type')) {
+                        shouldUpdate = true;
+                    }
+                    
+                    if (shouldUpdate) {
+                        clearTimeout(updateTimeout);
+                        updateTimeout = setTimeout(updateAllConnectedTabs, 500);
+                    }
+                });
+            }
+
+            function updateScorePill(radioElement) {
+                const qContainer = radioElement.closest('.question-container');
+                const scorePill = qContainer.querySelector('.score-pill');
+                const scoreDisplay = qContainer.querySelector('.score-display');
+                const selectedRadio = qContainer.querySelector(`input[name$="_score"]:checked`);
+                if (selectedRadio) {
+                    const score = selectedRadio.value;
+                    scoreDisplay.textContent = score;
+                    scorePill.className = 'score-pill text-sm font-medium px-3 py-1 rounded-full whitespace-nowrap';
+                    if (score === '1') scorePill.classList.add('bg-red-100', 'text-red-800');
+                    else if (score === '2') scorePill.classList.add('bg-orange-100', 'text-orange-800');
+                    else if (score === '3') scorePill.classList.add('bg-green-100', 'text-green-800');
+                } else {
+                    scoreDisplay.textContent = 'N/A';
+                    scorePill.className = 'score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap';
+                }
+            }
+
+            const chapterNav = document.getElementById('chapter-nav');
+            const chapterSections = document.querySelectorAll('.chapter-section');
+            if(chapterNav) {
+                chapterNav.addEventListener('click', (e) => {
+                    const link = e.target.closest('a');
+                    if (!link) return;
+                    e.preventDefault();
+                    const targetElement = document.querySelector(link.getAttribute('href'));
+                    if (targetElement) window.scrollTo({ top: targetElement.getBoundingClientRect().top + window.pageYOffset - 150, behavior: "smooth" });
+                });
+            }
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const id = entry.target.getAttribute('id');
+                    const navLink = chapterNav.querySelector(`a[href="#${id}"]`);
+                    if (entry.isIntersecting && navLink) {
+                        chapterNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
+                        navLink.classList.add('active');
+                    }
+                });
+            }, { rootMargin: "-40% 0px -60% 0px", threshold: 0 });
+            if (chapterSections.length > 0) chapterSections.forEach(section => { observer.observe(section); });
+            
+            function updateChapterProgress() {
+                if (!chapterNav) return;
+                chapterSections.forEach(section => {
+                    const chapterId = section.getAttribute('id');
+                    const questions = section.querySelectorAll('.question-container');
+                    let answered = 0, findingsCount = 0;
+                    questions.forEach(q => {
+                        if (q.querySelector('input[name$="_score"]:checked')) answered++;
+                        findingsCount += q.querySelectorAll('.finding-row').length;
+                    });
+                    const percentage = questions.length > 0 ? (answered / questions.length) * 100 : 0;
+                    const navTile = chapterNav.querySelector(`.chapter-tile[href="#${chapterId}"]`);
+                    if (navTile) {
+                        navTile.querySelector('.progress-bar').style.width = `${percentage}%`;
+                        navTile.querySelector('.progress-text').textContent = `${answered}/${questions.length} Qs`;
+                        navTile.querySelector('.findings-count').innerHTML = `Findings: <b>${findingsCount}</b>`;
+                    }
+                });
+            };
+
+            function getAuditData() {
+                const data = [];
+                document.querySelectorAll('.chapter-section').forEach((chap, i) => {
+                    const chapterNum = i + 1;
+                    const chapterData = { id: `chapter-${chapterNum}`, title: auditQuestions[`chapter-${chapterNum}`].title, questions: [], score: 0, maxScore: 0, findingsCount: 0 };
+                    chap.querySelectorAll('.question-container').forEach(q => {
+                        const scoreRadio = q.querySelector('input[name$="_score"]:checked');
+                        const questionData = { id: q.dataset.questionId, text: q.dataset.questionText, score: scoreRadio ? parseInt(scoreRadio.value) : 0, maxScore: 3, comment: q.querySelector('.auditor-comment').value, findings: [] };
+                        q.querySelectorAll('.finding-row').forEach(f => {
+                            const name = f.querySelector('.finding-name').value;
+                            const type = f.querySelector('.finding-type').value;
+                            if (name && type) {
+                                questionData.findings.push({ name, type });
+                                chapterData.findingsCount++;
+                            }
+                        });
+                        if (scoreRadio) {
+                            chapterData.score += questionData.score;
+                            chapterData.maxScore += questionData.maxScore;
+                        }
+                        chapterData.questions.push(questionData);
+                    });
+                    data.push(chapterData);
+                });
+                return data;
+            }
+
+            function generateScoreAndDetailsTab() {
+                const auditData = getAuditData();
+                let totalScore = 0, totalMaxScore = 0;
+                const breakdownBody = document.querySelector('#score-breakdown-table tbody');
+                breakdownBody.innerHTML = '';
+                const chapterScores = auditData.map(chapter => {
+                    totalScore += chapter.score;
+                    totalMaxScore += chapter.maxScore;
+                    const percentage = chapter.maxScore > 0 ? ((chapter.score / chapter.maxScore) * 100).toFixed(0) : 0;
+                    breakdownBody.innerHTML += `<tr class="border-b"><td class="p-3 font-medium">${chapter.title}</td><td class="p-3">${chapter.score}</td><td class="p-3">${chapter.maxScore}</td><td class="p-3 font-semibold">${percentage}%</td><td class="p-3">${chapter.findingsCount}</td></tr>`;
+                    return percentage;
+                });
+                const overallPercentage = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 100).toFixed(0) : 0;
+                document.getElementById('overallScoreText').textContent = `${overallPercentage}%`;
+                const overallCtx = document.getElementById('overallScoreChart').getContext('2d');
+                if (overallScoreChart) overallScoreChart.destroy();
+                overallScoreChart = new Chart(overallCtx, { type: 'doughnut', data: { datasets: [{ data: [overallPercentage, 100 - overallPercentage], backgroundColor: ['#4f46e5', '#e5e7eb'], borderWidth: 0, borderRadius: 5 }] }, options: { responsive: true, cutout: '80%', plugins: { tooltip: { enabled: false } } } });
+                const chapterCtx = document.getElementById('scoreByChapterChart').getContext('2d');
+                if (scoreByChapterChart) scoreByChapterChart.destroy();
+                scoreByChapterChart = new Chart(chapterCtx, { type: 'bar', data: { labels: auditData.map(c => c.title), datasets: [{ label: 'Score %', data: chapterScores, backgroundColor: ['#818cf8', '#6366f1', '#4f46e5', '#4338ca'], borderRadius: 4, maxBarThickness: 30 }] }, options: { responsive: true, indexAxis: 'y', scales: { x: { max: 100, beginAtZero: true } }, plugins: { legend: { display: false } } } });
+            }
+
+            function generateFindingsActionsTab() {
+                const auditData = getAuditData();
+                const tableBody = document.getElementById('findings-action-table-body');
+                tableBody.innerHTML = '';
+                let totalFindings = 0, openFindings = 0, overdueFindings = 0;
+                auditData.forEach(chapter => {
+                    chapter.questions.forEach(q => {
+                        q.findings.forEach(f => {
+                            totalFindings++;
+                            openFindings++;
+                            const isOverdue = Math.random() > 0.8;
+                            if (isOverdue) overdueFindings++;
+                            const typeClass = f.type === 'Non-Conformance' ? 'status-non-conformance' : 'status-area-for-improvement';
+                            const statusClass = isOverdue ? 'status-overdue' : 'status-open';
+                            tableBody.innerHTML += `<tr class="border-t cursor-pointer hover:bg-gray-50 finding-nav-row" data-question-id="${q.id}"><td class="p-4 font-medium">${f.name}<br><small class="text-gray-500">From ${q.id.toUpperCase()}</small></td><td class="p-4"><span class="status-pill ${typeClass}">${f.type}</span></td><td class="p-4 ${isOverdue ? 'text-red-600' : ''}">2025-10-25</td><td class="p-4"><span class="status-pill ${statusClass}">${isOverdue ? 'Overdue' : 'Open'}</span></td></tr>`;
+                        });
+                    });
+                });
+                document.getElementById('total-findings-count').textContent = totalFindings;
+                document.getElementById('open-findings-count').textContent = openFindings - overdueFindings;
+                document.getElementById('overdue-findings-count').textContent = overdueFindings;
+            }
+
+            function generateReportTab() {
+                const auditData = getAuditData();
+                const reportContent = document.getElementById('report-content');
+                reportContent.innerHTML = '';
+                auditData.forEach(chapter => {
+                    let questionsHTML = '';
+                    chapter.questions.forEach(q => {
+                        if (q.score > 0 || q.comment || q.findings.length > 0) {
+                             questionsHTML += `<div class="p-4 border-t"><p class="font-medium">${q.id.toUpperCase()} - ${q.text}</p><div class="mt-2 pl-4 text-sm space-y-2"><p><strong>Score:</strong> ${q.score} / ${q.maxScore}</p>${q.comment ? `<p><strong>Comments:</strong> ${q.comment}</p>` : ''}${q.findings.length > 0 ? `<div><p><strong>Findings:</strong></p><ul class="list-disc pl-5 mt-1 text-gray-700">${q.findings.map(f => `<li>${f.name} (${f.type})</li>`).join('')}</ul></div>` : ''}</div></div>`;
+                        }
+                    });
+                    if (questionsHTML) {
+                        reportContent.innerHTML += `<div class="border rounded-lg overflow-hidden"><h4 class="font-semibold p-3 bg-gray-100">${chapter.title}</h4>${questionsHTML}</div>`;
+                    }
+                });
+            }
+
+            function updateAllConnectedTabs() {
+                updateChapterProgress();
+                const activeTab = document.querySelector('.view-tab-btn.text-indigo-600');
+                if (!activeTab) return;
+                const targetId = activeTab.dataset.target;
+                if (targetId === 'view-score-details') generateScoreAndDetailsTab();
+                else if (targetId === 'view-findings-actions') generateFindingsActionsTab();
+                else if (targetId === 'view-report') generateReportTab();
+            }
+
+            const findingsActionTab = document.getElementById('view-findings-actions');
+            findingsActionTab.addEventListener('click', (e) => {
+                const row = e.target.closest('.finding-nav-row');
+                if (!row) return;
+                const questionId = row.dataset.questionId;
+                document.querySelector('.view-tab-btn[data-target="view-assessment"]').click();
+                setTimeout(() => {
+                    const questionElement = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
+                    if (questionElement) {
+                        questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        questionElement.classList.add('highlight-question');
+                        setTimeout(() => questionElement.classList.remove('highlight-question'), 2500);
+                    }
+                }, 100);
+            });
+            
+            function initializeAuditState() {
+                document.querySelectorAll('input[name$="_score"]:checked').forEach(radio => updateScorePill(radio));
+                updateChapterProgress();
+            }
+
+            initializeAuditState();
+        });
+    </script>
+</body>
+</html>
+
