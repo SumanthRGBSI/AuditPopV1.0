@@ -3,262 +3,599 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audit Assessment</title>
-    <!-- Tailwind CSS CDN -->
+    <title>EHS Intelligence Platform</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js for Dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-        /* Custom styles to match Figma design */
+        /* Custom styles to enhance the UI */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #111827; /* bg-gray-900 */
+            background-color: #f0f2f5; /* A softer gray background */
         }
-        /* Custom scrollbar for a more refined look */
-        ::-webkit-scrollbar {
-            width: 8px;
+
+        /* Page transition effect */
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+        /* Status Pills for visual indicators */
+        .status-pill {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
         }
-        ::-webkit-scrollbar-track {
-            background: #1F2937; /* bg-gray-800 */
+        .status-completed { background-color: #dcfce7; color: #166534; }
+        .status-in-progress { background-color: #fef9c3; color: #854d0e; }
+        .status-overdue { background-color: #fee2e2; color: #991b1b; }
+        .status-awaiting-response { background-color: #cffafe; color: #0891b2; }
+        .status-critical { background-color: #fee2e2; color: #991b1b; }
+        .status-major { background-color: #ffedd5; color: #9a3412; }
+        .status-minor { background-color: #fef9c3; color: #854d0e; }
+        
+        /* Accordion styles */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        details summary .group-arrow { transition: transform 0.2s; }
+        details[open] > summary .group-arrow { transform: rotate(90deg); }
+
+        /* Modal styles for smooth transitions */
+        .modal-overlay {
+            transition: opacity 0.3s ease;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #4B5563; /* bg-gray-600 */
-            border-radius: 4px;
+        .modal-content {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6B7280; /* bg-gray-500 */
+        .modal-overlay.open .modal-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Custom focus rings for better accessibility */
+        *:focus-visible {
+            outline: 2px solid #2563eb !important;
+            outline-offset: 2px;
         }
     </style>
 </head>
-<body class="text-gray-300">
-    <div class="flex h-screen bg-gray-900">
-        <!-- Sidebar -->
-        <aside class="w-64 flex-shrink-0 bg-gray-900 border-r border-gray-700/50 flex flex-col">
-            <!-- Logo -->
-            <div class="h-16 flex items-center justify-center px-4 border-b border-gray-700/50">
-                <div class="flex items-center space-x-2">
-                    <svg class="h-8 w-8 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286Zm0 13.036h.008v.008h-.008v-.008Z" />
-                    </svg>
-                    <span class="text-xl font-bold text-white">Sentinel</span>
-                </div>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 px-4 py-6 space-y-2">
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200">
-                    <!-- Icon: Dashboard -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                    Dashboard
-                </a>
-                <a href="#" class="flex items-center px-4 py-2 bg-gray-700/50 text-white rounded-md transition-colors duration-200">
-                    <!-- Icon: Audits -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                    Audits
-                </a>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200">
-                    <!-- Icon: Companies -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0v-4m0 4H3m0 0h2m-2 0v-4m0 4v-4m16 0v-4m0 4v-4m-9-4h5M9 7h1m-1 4h1m-1 4h1m-1 4h1m-1-4h1m-1 4h1m-1 4h1" />
-                    </svg>
-                    Companies
-                </a>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200">
-                    <!-- Icon: Reports -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Reports
-                </a>
-            </nav>
+<body class="text-gray-800">
 
-            <!-- Sidebar Footer -->
-            <div class="px-4 py-6 border-t border-gray-700/50 space-y-2">
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200">
-                    <!-- Icon: Settings -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Settings
-                </a>
-                <a href="#" class="flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200">
-                     <!-- Icon: Logout -->
-                    <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                </a>
-            </div>
-        </aside>
-
+    <div class="bg-gray-100">
         <!-- Main Content -->
-        <main class="flex-1 overflow-y-auto">
-            <!-- Header -->
-            <header class="h-16 bg-gray-900 border-b border-gray-700/50 flex items-center justify-between px-6">
-                <div>
-                     <h1 class="text-xl font-semibold text-white">Audit Assessment</h1>
+        <main class="flex-1 flex flex-col min-h-screen">
+            <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
+                <div class="flex items-center">
+                    <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-shield-alt mr-2"></i> EHS Intelligence</h1>
                 </div>
-                <div class="flex items-center space-x-6">
-                    <!-- Search Bar -->
-                    <div class="relative">
-                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
-                        <input type="text" placeholder="Search..." class="bg-gray-800 border border-gray-700 rounded-lg py-2 pl-10 pr-4 w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white">
-                    </div>
-                    <!-- User Profile -->
-                    <div class="flex items-center space-x-3">
-                        <img class="h-10 w-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?q=80&w=2067&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="User avatar">
-                        <div>
-                            <p class="font-semibold text-white text-sm">Alexandra Lee</p>
-                            <p class="text-gray-400 text-xs">Auditor</p>
+                 <div class="flex items-center">
+                    <button id="breadcrumb-back" class="text-gray-500 hover:text-gray-700 mr-4 hidden"><i class="fas fa-arrow-left"></i></button>
+                    <h2 id="page-title" class="text-xl font-semibold text-gray-800">All Audits</h2>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="text-gray-500 hover:text-gray-700"><i class="fas fa-bell"></i></button>
+                    <a href="#" class="flex items-center text-gray-600 hover:bg-gray-50 rounded-lg p-2">
+                        <img class="h-8 w-8 rounded-full object-cover" src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD" alt="User avatar">
+                        <div class="ml-3 text-left">
+                            <p class="text-sm font-medium text-gray-800">John Doe</p>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </header>
-            
-            <!-- Page Content -->
-            <div class="p-6">
-                <!-- Breadcrumbs and Title -->
-                <div class="mb-6">
-                    <p class="text-sm text-gray-500">Audits / Audit Assessment</p>
-                    <h2 class="text-2xl font-bold text-white mt-1">Audit Assessment</h2>
-                </div>
+
+            <div class="flex-1 overflow-y-auto p-6">
                 
-                <!-- Tabs -->
-                <div class="border-b border-gray-700 mb-6">
-                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
-                        <a href="#" class="py-3 px-1 text-gray-400 hover:text-white whitespace-nowrap">Overview</a>
-                        <a href="#" class="py-3 px-1 border-b-2 border-indigo-500 font-semibold text-indigo-400 whitespace-nowrap">Assessment</a>
-                        <a href="#" class="py-3 px-1 text-gray-400 hover:text-white whitespace-nowrap">Action Plan</a>
-                        <a href="#" class="py-3 px-1 text-gray-400 hover:text-white whitespace-nowrap">Report</a>
-                    </nav>
-                </div>
-                
-                <!-- Assessment Table -->
-                <div class="bg-gray-800/50 border border-gray-700/50 rounded-lg shadow-md">
-                    <!-- Table Header -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 border-b border-gray-700/50 text-xs font-bold uppercase text-gray-500">
-                        <div class="md:col-span-3">Control</div>
-                        <div class="md:col-span-4">Maturity Level</div>
-                        <div class="md:col-span-3">Compliance Status</div>
-                        <div class="md:col-span-2 text-right">Evidence</div>
+                <!-- PAGE: Audit List -->
+                <div id="audit-list-page" class="page active">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">Audits</h2>
+                         <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 flex items-center" onclick="showPage('audit-create-page')">
+                            <i class="fas fa-plus mr-2"></i> Create Audit
+                        </button>
                     </div>
-                    
-                    <!-- Table Body -->
-                    <div class="divide-y divide-gray-700/50">
-                        <!-- Row 1: Access Control -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-700/30 transition-colors duration-200">
-                            <div class="md:col-span-3 font-medium text-white">Access Control</div>
-                            <div class="md:col-span-4 flex items-center space-x-3">
-                                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 75%"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-300">75%</span>
-                            </div>
-                            <div class="md:col-span-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
-                                    Compliant
-                                </span>
-                            </div>
-                            <div class="md:col-span-2 text-right">
-                                <a href="#" class="font-medium text-indigo-400 hover:text-indigo-300">View</a>
-                            </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Status: All</option></select>
+                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Audit Type: All</option></select>
+                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Auditor: All</option></select>
+                            <input type="date" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500">
+                            <button class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 w-full flex items-center justify-center"><i class="fas fa-filter mr-2"></i> Apply</button>
                         </div>
-
-                        <!-- Row 2: Cryptography -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-700/30 transition-colors duration-200">
-                            <div class="md:col-span-3 font-medium text-white">Cryptography</div>
-                            <div class="md:col-span-4 flex items-center space-x-3">
-                                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                                    <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 40%"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-300">40%</span>
-                            </div>
-                            <div class="md:col-span-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900 text-yellow-300">
-                                    Partially Compliant
-                                </span>
-                            </div>
-                            <div class="md:col-span-2 text-right">
-                                <a href="#" class="font-medium text-indigo-400 hover:text-indigo-300">View</a>
-                            </div>
-                        </div>
-
-                        <!-- Row 3: Physical Security -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-700/30 transition-colors duration-200">
-                            <div class="md:col-span-3 font-medium text-white">Physical Security</div>
-                            <div class="md:col-span-4 flex items-center space-x-3">
-                                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                                    <div class="bg-red-500 h-2.5 rounded-full" style="width: 15%"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-300">15%</span>
-                            </div>
-                            <div class="md:col-span-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-900 text-red-300">
-                                    Non-Compliant
-                                </span>
-                            </div>
-                            <div class="md:col-span-2 text-right">
-                                <a href="#" class="font-medium text-indigo-400 hover:text-indigo-300">View</a>
-                            </div>
-                        </div>
-
-                        <!-- Row 4: Security Operations -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-700/30 transition-colors duration-200">
-                            <div class="md:col-span-3 font-medium text-white">Security Operations</div>
-                            <div class="md:col-span-4 flex items-center space-x-3">
-                                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 90%"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-300">90%</span>
-                            </div>
-                            <div class="md:col-span-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-900 text-green-300">
-                                    Compliant
-                                </span>
-                            </div>
-                            <div class="md:col-span-2 text-right">
-                                <a href="#" class="font-medium text-indigo-400 hover:text-indigo-300">View</a>
-                            </div>
-                        </div>
-
-                         <!-- Row 5: Incident Response -->
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-700/30 transition-colors duration-200">
-                            <div class="md:col-span-3 font-medium text-white">Incident Response</div>
-                            <div class="md:col-span-4 flex items-center space-x-3">
-                                <div class="w-full bg-gray-700 rounded-full h-2.5">
-                                    <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 60%"></div>
-                                </div>
-                                <span class="text-sm font-semibold text-gray-300">60%</span>
-                            </div>
-                            <div class="md:col-span-3">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-900 text-yellow-300">
-                                    Partially Compliant
-                                </span>
-                            </div>
-                            <div class="md:col-span-2 text-right">
-                                <a href="#" class="font-medium text-indigo-400 hover:text-indigo-300">View</a>
-                            </div>
+                    </div>
+                    <div class="bg-white shadow-sm rounded-xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full leading-normal text-sm">
+                                <thead class="bg-gray-50"><tr class="border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase"><th class="px-5 py-3">Audit Details</th><th class="px-5 py-3">Status</th><th class="px-5 py-3">Personnel</th><th class="px-5 py-3">Key Dates</th><th class="px-5 py-3">Score</th><th class="px-5 py-3">Action</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b border-gray-200"><td class="px-5 py-4"><p class="font-bold">AUD-2025-001</p><p class="text-sm text-gray-600">Supplier Audit - Routine Check</p></td><td class="px-5 py-4"><span class="status-pill status-in-progress">In Progress</span><p class="text-xs mt-1">CAPA: <span class="status-pill status-awaiting-response">Awaiting</span></p></td><td class="px-5 py-4 text-sm"><p><strong>Auditee:</strong> ACME Corp.</p><p><strong>Auditor(s):</strong> Jane Smith</p></td><td class="px-5 py-4 text-sm"><p><strong>Req:</strong> 2025-06-01</p><p><strong>Sub:</strong> 2025-07-15</p></td><td class="px-5 py-4 font-bold">--</td><td class="px-5 py-4"><button class="text-blue-600 hover:text-blue-800" onclick="showPage('audit-view-page')" title="View Audit"><i class="fas fa-eye text-lg"></i></button></td></tr>
+                                    <tr class="border-b border-gray-200"><td class="px-5 py-4"><p class="font-bold">AUD-2025-002</p><p class="text-sm text-gray-600">Internal Process Audit</p></td><td class="px-5 py-4"><span class="status-pill status-completed">Completed</span></td><td class="px-5 py-4 text-sm"><p><strong>Auditee:</strong> Finance Dept.</p><p><strong>Auditor(s):</strong> Mike Johnson</p></td><td class="px-5 py-4 text-sm"><p><strong>Req:</strong> 2025-05-10</p><p><strong>Sub:</strong> 2025-06-05</p></td><td class="px-5 py-4 font-bold">92%</td><td class="px-5 py-4"><button class="text-blue-600 hover:text-blue-800" onclick="showPage('audit-view-page')" title="View Audit"><i class="fas fa-eye text-lg"></i></button></td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+
+                <!-- PAGE: Audit Create -->
+                <div id="audit-create-page" class="page">
+                    <!-- This page content can be added based on the original prototype, but with improved styling -->
+                </div>
                 
-                <!-- Action Button -->
-                <div class="mt-8 flex justify-end">
-                    <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50">
-                        Submit Assessment
-                    </button>
+                <!-- PAGE: Audit View -->
+                <div id="audit-view-page" class="page">
+                    <div class="border-b border-gray-200 bg-white sticky top-16 z-10 -ml-6 -mr-6 px-6">
+                        <nav class="-mb-px flex space-x-8" id="view-tabs">
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-audit-details">View Audit</button>
+                            <button class="view-tab-btn text-blue-600 border-b-2 border-blue-600 py-4 px-1 text-sm font-medium" data-target="view-assessment">Assessment</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-score-details">Audit Score And Details</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-findings-actions">Audit Findings And Actions</button>
+                            <button class="view-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 py-4 px-1 text-sm font-medium" data-target="view-report">Audit Report</button>
+                        </nav>
+                    </div>
+                    <div class="pt-6">
+                        <!-- View Audit Tab -->
+                        <div id="view-audit-details" class="view-tab-content hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-lg font-semibold mb-4">Audit Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><strong>Audit ID:</strong> AUD-2025-001</div>
+                                    <div><strong>Audit Type:</strong> Supplier Audit</div>
+                                    <div><strong>Auditee:</strong> ACME Corp.</div>
+                                    <div><strong>Auditor(s):</strong> Jane Smith</div>
+                                    <div><strong>Request Date:</strong> 2025-06-01</div>
+                                    <div><strong>Submission Date:</strong> 2025-07-15</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assessment Tab -->
+                        <div id="view-assessment" class="view-tab-content">
+                            <div class="bg-white rounded-xl shadow-sm">
+                                <div class="p-4 border-b">
+                                    <nav class="flex space-x-4" id="assessment-phase-tabs">
+                                        <button class="assessment-phase-btn font-semibold text-blue-600 border-b-2 border-blue-600 pb-2 px-2" data-phase="onsite">Onsite Assessment</button>
+                                        <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="offsite">Offsite Assessment</button>
+                                        <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="self">Self Assessment</button>
+                                    </nav>
+                                </div>
+
+                                <div id="assessment-phases-container" class="p-4">
+                                    <!-- Onsite Phase -->
+                                    <div class="assessment-phase active" id="phase-onsite">
+                                        <div class="space-y-2">
+                                            <!-- Onsite Group 1 -->
+                                            <details class="group border rounded-lg"><summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 1: Emergency Preparedness</span></div><div class="text-xs space-x-4 text-gray-600"><span>Score: <b class="text-black">4/6</b></span><span>Findings: <b class="text-black">1</b></span></div></summary><div class="p-4 border-t space-y-2"><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.1 - Are emergency exits clearly marked and unobstructed?</span><span>Score: <b class="text-blue-600">2</b></span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.2 - Is fire extinguisher maintenance up to date?</span><span>Score: <b class="text-blue-600">2</b></span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.3 - Are first aid kits readily available and fully stocked?</span><span>Score: <b class="text-blue-600">0</b></span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details></div></details>
+                                            <!-- Onsite Group 2 -->
+                                            <details class="group border rounded-lg" open>
+                                                <summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 2: Machine Guarding & Safety</span></div><div class="text-xs space-x-4 text-gray-600"><span>Score: <b class="text-black">1/4</b></span><span>Findings: <b class="text-black">1</b></span></div></summary>
+                                                <div class="p-4 border-t space-y-2">
+                                                    <details class="question-accordion border rounded-md" open><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.1 - Are all rotating parts and pinch points on machinery properly guarded?</span><span>Score: <b class="text-blue-600">1</b></span></summary>
+                                                        <div class="p-4 border-t bg-gray-50">
+                                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                                <div class="space-y-4">
+                                                                    <h4 class="font-semibold text-base border-b pb-2">Score</h4>
+                                                                    <div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2" checked> Score 1</label><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2"> Score 2</label></div>
+                                                                    <div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3">Guard on lathe #3 is cracked.</textarea></div>
+                                                                </div>
+                                                                <div class="space-y-4">
+                                                                    <h4 class="font-semibold text-base border-b pb-2">Findings</h4>
+                                                                    <table class="w-full text-sm findings-table">
+                                                                        <thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead>
+                                                                        <tbody><tr><td class="py-1 pr-2">1</td><td class="p-1"><input type="text" value="Cracked machine guard" class="w-full p-1 border rounded-md"></td><td class="p-1"><select class="w-full p-1 border rounded-md"><option>Non-Conformance</option><option>Area for Improvement</option></select></td><td class="py-1 pl-2 text-center"><button class="text-gray-500 hover:text-blue-600"><i class="fas fa-paperclip"></i></button><button class="text-gray-500 hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></td></tr></tbody>
+                                                                    </table>
+                                                                    <button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </details>
+                                                    <details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.2 - Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?</span><span>Score: <b class="text-blue-600">0</b></span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details>
+                                                </div>
+                                            </details>
+                                        </div>
+                                    </div>
+                                    <!-- Offsite Phase -->
+                                    <div class="assessment-phase hidden" id="phase-offsite">
+                                        <div class="space-y-2 p-4">
+                                            <details class="group border rounded-lg"><summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 1: Training & Competency Records</span></div></summary><div class="p-4 border-t space-y-2"><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.1 - Are new employee safety orientation records complete for all hires in the last 12 months?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.2 - Is there a documented training matrix for all safety-critical roles?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details></div></details>
+                                            <details class="group border rounded-lg"><summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 2: Regulatory & Permit Documentation</span></div></summary><div class="p-4 border-t space-y-2"><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.1 - Is the facility's Air Permit current and readily accessible?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.2 - Are all required regulatory reports (e.g., OSHA 300A, EPA Tier II) for the previous year on file?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details></div></details>
+                                        </div>
+                                    </div>
+                                    <!-- Self Assessment Phase -->
+                                    <div class="assessment-phase hidden" id="phase-self">
+                                        <div class="space-y-2 p-4">
+                                            <details class="group border rounded-lg"><summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 1: General Work Area Housekeeping</span></div></summary><div class="p-4 border-t space-y-2"><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.1 - Are walkways and egress paths clear of obstructions?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">1.2 - Is waste being disposed of in designated, properly labeled containers?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details></div></details>
+                                            <details class="group border rounded-lg"><summary class="p-3 cursor-pointer flex justify-between items-center bg-gray-50 rounded-t-lg"><div class="flex items-center"><i class="fas fa-chevron-right group-arrow mr-3 text-gray-500"></i><span class="font-semibold">Group 2: Personal Protective Equipment (PPE)</span></div></summary><div class="p-4 border-t space-y-2"><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.1 - Is all required PPE for your tasks available at the point of use?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details><details class="question-accordion border rounded-md"><summary class="p-3 cursor-pointer flex justify-between items-center text-sm"><span class="font-medium">2.2 - Have you inspected your assigned PPE, and is it in good condition?</span></summary><div class="p-4 border-t bg-gray-50"><!-- Scoring & Findings UI --></div></details></div></details>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score and Details Tab -->
+                        <div id="view-score-details" class="view-tab-content hidden">
+                           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                                <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm text-center">
+                                    <h3 class="font-semibold text-lg mb-4">Overall Score</h3>
+                                    <div class="relative w-48 h-48 mx-auto">
+                                        <canvas id="overallScoreChart"></canvas>
+                                        <div class="absolute inset-0 flex items-center justify-center text-4xl font-bold text-blue-600">85%</div>
+                                    </div>
+                                </div>
+                                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                                    <h3 class="font-semibold text-lg mb-4">Score by Group</h3>
+                                    <canvas id="scoreByGroupChart" height="150"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="text-lg font-semibold mb-4">Score Breakdown</h3>
+                                <table class="min-w-full text-sm">
+                                    <thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase"><th class="p-3">Question Group</th><th class="p-3">Score</th><th class="p-3">Max Score</th><th class="p-3">Percentage</th><th class="p-3">Findings</th></tr></thead>
+                                    <tbody>
+                                        <tr class="border-b"><td class="p-3 font-medium">Group 1: Emergency Preparedness</td><td class="p-3">4</td><td class="p-3">6</td><td class="p-3 font-semibold">67%</td><td class="p-3">1</td></tr>
+                                        <tr class="border-b"><td class="p-3 font-medium">Group 2: Machine Guarding</td><td class="p-3">1</td><td class="p-3">4</td><td class="p-3 font-semibold">25%</td><td class="p-3">1</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Findings and Actions Tab -->
+                        <div id="view-findings-actions" class="view-tab-content hidden">
+                            <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                                    <div class="p-4 bg-gray-100 rounded-lg"><h4 class="text-sm font-medium text-gray-500">Total Findings</h4><p class="text-3xl font-bold mt-1">3</p></div>
+                                    <div class="p-4 bg-blue-100 rounded-lg"><h4 class="text-sm font-medium text-blue-700">Open</h4><p class="text-3xl font-bold mt-1 text-blue-600">2</p></div>
+                                    <div class="p-4 bg-red-100 rounded-lg"><h4 class="text-sm font-medium text-red-700">Overdue</h4><p class="text-3xl font-bold mt-1 text-red-600">1</p></div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 border bg-gray-50 rounded-lg">
+                                    <input type="text" placeholder="Search by keyword..." class="w-full p-2 border border-gray-300 rounded-lg md:col-span-1">
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg"><option>Status: All</option></select>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg"><option>Severity: All</option></select>
+                                    <select class="w-full p-2 border border-gray-300 rounded-lg"><option>Phase: All</option></select>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full text-sm">
+                                        <thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase"><th class="p-4">Finding</th><th class="p-4">Severity</th><th class="p-4">Assigned To</th><th class="p-4">Due Date</th><th class="p-4">Status</th><th class="p-4">Action</th></tr></thead>
+                                        <tbody>
+                                            <tr class="border-t"><td class="p-4 font-medium">Cracked machine guard<br><small class="text-gray-500">From Q2.1 - Onsite</small></td><td class="p-4"><span class="status-pill status-major">Non-Conformance</span></td><td class="p-4">Mark Johnson</td><td class="p-4 text-red-600 font-medium">2025-08-15</td><td class="p-4"><span class="status-pill status-overdue">Overdue</span></td><td class="p-4"><button class="text-blue-600 font-semibold manage-finding-btn">Manage</button></td></tr>
+                                            <tr class="border-t"><td class="p-4 font-medium">First aid kit missing items<br><small class="text-gray-500">From Q1.3 - Onsite</small></td><td class="p-4"><span class="status-pill status-minor">Area for Improvement</span></td><td class="p-4">Sarah Miller</td><td class="p-4">2025-09-01</td><td class="p-4"><span class="status-pill status-in-progress">Open</span></td><td class="p-4"><button class="text-blue-600 font-semibold manage-finding-btn">Manage</button></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Tab -->
+                        <div id="view-report" class="view-tab-content hidden">
+                           <div class="bg-white p-6 rounded-xl shadow-sm">
+                                <div class="flex justify-between items-center border-b pb-4 mb-6">
+                                    <div>
+                                        <h3 class="text-2xl font-bold">Audit Report</h3>
+                                        <p class="text-gray-500">AUD-2025-001: Supplier Audit - Routine Check</p>
+                                    </div>
+                                    <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700"><i class="fas fa-print mr-2"></i> Print Report</button>
+                                </div>
+                                <div class="space-y-6">
+                                    <!-- Report Group -->
+                                    <div class="border rounded-lg overflow-hidden">
+                                        <h4 class="font-semibold p-3 bg-gray-100">Group 2: Machine Guarding & Safety</h4>
+                                        <!-- Report Question -->
+                                        <div class="p-4 border-t">
+                                            <p class="font-medium">2.1 - Are all rotating parts and pinch points on machinery properly guarded?</p>
+                                            <div class="mt-2 pl-4 text-sm space-y-2">
+                                                <p><strong>Score:</strong> 1 / 2</p>
+                                                <p><strong>Comments:</strong> Guard on lathe #3 is cracked.</p>
+                                                <div>
+                                                    <p><strong>Findings:</strong></p>
+                                                    <ul class="list-disc pl-5 mt-1 text-gray-700">
+                                                        <li>Cracked machine guard (Non-Conformance)</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- ... more questions in group -->
+                                    </div>
+                                    <!-- ... more groups -->
+                                </div>
+                           </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- MODAL: Manage Finding Details & CAPA Workflow -->
+    <div id="manageFindingModal" class="modal-overlay fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="modal-content bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col transform">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200 flex-shrink-0">
+                <div>
+                    <h2 class="text-xl font-bold">Manage Finding: Cracked machine guard</h2>
+                    <p class="text-sm text-gray-500">From Question: 2.1 - Are all rotating parts...</p>
+                </div>
+                <button onclick="closeAllModals()" class="text-gray-400 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div class="flex-grow overflow-y-auto">
+                <div class="p-6">
+                    <div class="border-b border-gray-200 mb-6">
+                        <nav class="-mb-px flex space-x-6" id="finding-tabs">
+                            <button class="finding-tab-btn text-blue-600 border-b-2 border-blue-600 pb-2 px-1 text-sm font-medium" data-target="finding-rca">Root Cause Analysis</button>
+                            <button class="finding-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 pb-2 px-1 text-sm font-medium" data-target="finding-actions">Corrective Actions</button>
+                            <button class="finding-tab-btn text-gray-500 border-b-2 border-transparent hover:text-gray-700 pb-2 px-1 text-sm font-medium" data-target="finding-verification">Verification</button>
+                        </nav>
+                    </div>
+                    
+                    <!-- RCA Tab -->
+                    <div id="finding-rca" class="finding-tab-content">
+                        <h3 class="font-semibold text-lg mb-4">5 Whys - Root Cause Analysis</h3>
+                        <div class="space-y-4">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <label class="block text-sm font-medium text-gray-700">Problem Statement</label>
+                                <p class="mt-1 font-semibold">Guard on lathe #3 is cracked.</p>
+                            </div>
+                            <div class="relative pl-6" id="5-whys-container"></div>
+                            <button id="addWhyBtn" class="text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Why</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Other tabs would be built out here -->
+                    <div id="finding-actions" class="finding-tab-content hidden"><p>Corrective actions content goes here...</p></div>
+                    <div id="finding-verification" class="finding-tab-content hidden"><p>Verification content goes here...</p></div>
+                </div>
+            </div>
+            <div class="p-5 bg-gray-50 border-t border-gray-200 flex-shrink-0 text-right">
+                <button class="bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-300" onclick="closeAllModals()">Close</button>
+                <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow hover:bg-blue-700">Save Progress</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- SPA Navigation Logic ---
+            const pages = document.querySelectorAll('.page');
+            const pageTitle = document.getElementById('page-title');
+            const breadcrumbBack = document.getElementById('breadcrumb-back');
+            let pageHistory = ['audit-list-page'];
+
+            const showPage = (pageId, isBack = false) => {
+                pages.forEach(p => p.classList.remove('active'));
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                    let newTitle = "All Audits";
+                    if (pageId === 'audit-view-page') {
+                        newTitle = 'Audit Details';
+                    } else if (pageId === 'audit-create-page') {
+                        newTitle = 'Create Audit';
+                    }
+                    pageTitle.textContent = newTitle;
+                    
+                    if (!isBack && pageHistory[pageHistory.length - 1] !== pageId) {
+                        pageHistory.push(pageId);
+                    }
+
+                    breadcrumbBack.classList.toggle('hidden', pageId === 'audit-list-page');
+                }
+            };
+
+            breadcrumbBack.addEventListener('click', () => {
+                if (pageHistory.length > 1) {
+                    pageHistory.pop();
+                    showPage(pageHistory[pageHistory.length - 1], true);
+                }
+            });
+
+            window.showPage = showPage;
+
+            // --- Audit View Tab Logic ---
+            const auditViewPage = document.getElementById('audit-view-page');
+            const viewTabs = document.getElementById('view-tabs');
+            
+            viewTabs.addEventListener('click', (e) => {
+                const tabButton = e.target.closest('.view-tab-btn');
+                if (!tabButton || tabButton.dataset.target === '#') return;
+
+                viewTabs.querySelectorAll('.view-tab-btn').forEach(btn => {
+                    btn.classList.remove('text-blue-600', 'border-blue-600');
+                    btn.classList.add('text-gray-500', 'border-transparent');
+                });
+                tabButton.classList.add('text-blue-600', 'border-blue-600');
+                
+                const targetId = tabButton.dataset.target;
+                auditViewPage.querySelectorAll('.view-tab-content').forEach(content => {
+                    content.classList.add('hidden');
+                });
+                const targetContent = document.getElementById(targetId);
+                if(targetContent) {
+                    targetContent.classList.remove('hidden');
+                }
+
+                if (targetId === 'view-score-details') {
+                    setupScoreCharts();
+                }
+            });
+
+            // --- Assessment Phase Tab Logic ---
+            const assessmentPhaseTabs = document.getElementById('assessment-phase-tabs');
+            assessmentPhaseTabs.addEventListener('click', (e) => {
+                const phaseButton = e.target.closest('.assessment-phase-btn');
+                if (!phaseButton) return;
+
+                assessmentPhaseTabs.querySelectorAll('.assessment-phase-btn').forEach(btn => {
+                    btn.classList.remove('text-blue-600', 'border-blue-600');
+                    btn.classList.add('text-gray-500', 'border-transparent');
+                });
+                phaseButton.classList.add('text-blue-600', 'border-blue-600');
+
+                document.querySelectorAll('.assessment-phase').forEach(phase => {
+                    phase.classList.add('hidden');
+                    phase.classList.remove('active');
+                });
+                const targetPhase = document.getElementById(`phase-${phaseButton.dataset.phase}`);
+                if (targetPhase) {
+                    targetPhase.classList.remove('hidden');
+                    targetPhase.classList.add('active');
+                }
+            });
+
+            // --- Inline Finding Management ---
+            document.getElementById('view-assessment').addEventListener('click', function(e) {
+                const addBtn = e.target.closest('.add-finding-btn');
+                const removeBtn = e.target.closest('.remove-finding-btn');
+
+                if (addBtn) {
+                    const tableBody = addBtn.previousElementSibling.querySelector('tbody');
+                    const newRow = document.createElement('tr');
+                    const rowCount = tableBody.rows.length + 1;
+                    newRow.innerHTML = `
+                        <td class="py-1 pr-2">${rowCount}</td>
+                        <td class="p-1"><input type="text" class="w-full p-1 border rounded-md"></td>
+                        <td class="p-1">
+                            <select class="w-full p-1 border rounded-md">
+                                <option>Area for Improvement</option>
+                                <option>Non-Conformance</option>
+                            </select>
+                        </td>
+                        <td class="py-1 pl-2 text-center">
+                            <button class="text-gray-500 hover:text-blue-600"><i class="fas fa-paperclip"></i></button>
+                            <button class="text-gray-500 hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tableBody.appendChild(newRow);
+                }
+
+                if (removeBtn) {
+                    const row = removeBtn.closest('tr');
+                    const tableBody = row.parentElement;
+                    row.remove();
+                    Array.from(tableBody.rows).forEach((r, index) => {
+                        r.cells[0].textContent = index + 1;
+                    });
+                }
+            });
+
+            // --- Modal Logic ---
+            const openModal = (modalId) => {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    setTimeout(() => modal.classList.add('open'), 10);
+                }
+            };
+
+            const closeAllModals = () => {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.classList.remove('open');
+                    setTimeout(() => modal.classList.add('hidden'), 300);
+                });
+            };
+            
+            window.openModal = openModal;
+            window.closeAllModals = closeAllModals;
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape") closeAllModals();
+            });
+
+            document.getElementById('view-findings-actions').addEventListener('click', (e) => {
+                if (e.target.classList.contains('manage-finding-btn')) {
+                    openModal('manageFindingModal');
+                }
+            });
+            
+            setupFindingModalTabs();
+
+            // --- Score Charts ---
+            let overallScoreChart, scoreByGroupChart;
+            const setupScoreCharts = () => {
+                const overallCtx = document.getElementById('overallScoreChart');
+                if (overallCtx && !overallScoreChart) {
+                    overallScoreChart = new Chart(overallCtx, {
+                        type: 'doughnut',
+                        data: { datasets: [{ data: [85, 15], backgroundColor: ['#2563eb', '#e5e7eb'], borderWidth: 0, borderRadius: 5 }] },
+                        options: { responsive: true, cutout: '80%', plugins: { tooltip: { enabled: false } } }
+                    });
+                }
+
+                const groupByCtx = document.getElementById('scoreByGroupChart');
+                if (groupByCtx && !scoreByGroupChart) {
+                    scoreByGroupChart = new Chart(groupByCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Group 1: Emergency Prep', 'Group 2: Machine Guarding'],
+                            datasets: [{ label: 'Score %', data: [67, 25], backgroundColor: ['#60a5fa', '#3b82f6', '#2563eb'], borderRadius: 4, maxBarThickness: 40 }]
+                        },
+                        options: { responsive: true, indexAxis: 'y', scales: { x: { max: 100, beginAtZero: true } }, plugins: { legend: { display: false } } }
+                    });
+                }
+            };
+            
+            // --- 5 Whys Logic in Modal ---
+            const whysContainer = document.getElementById('5-whys-container');
+            const addWhyBtn = document.getElementById('addWhyBtn');
+            let whyCount = 0;
+
+            const addWhyInput = () => {
+                if (whyCount >= 5) return;
+                whyCount++;
+                const whyBlock = `
+                    <div class="flex items-start space-x-2 why-block">
+                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 text-blue-700 font-bold rounded-full flex items-center justify-center text-sm">Why?</div>
+                        <div class="flex-grow">
+                            <textarea class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500" rows="2" placeholder="Because..."></textarea>
+                        </div>
+                    </div>
+                    ${whyCount < 5 ? '<div class="h-6 w-px bg-gray-300 ml-5"></div>' : ''}
+                `;
+                whysContainer.insertAdjacentHTML('beforeend', whyBlock);
+            };
+
+            if (addWhyBtn) {
+                addWhyBtn.addEventListener('click', addWhyInput);
+                addWhyInput(); // Start with one input
+            }
+
+            function setupFindingModalTabs() {
+                const findingTabs = document.getElementById('finding-tabs');
+                findingTabs.addEventListener('click', (e) => {
+                    const tabButton = e.target.closest('.finding-tab-btn');
+                    if (!tabButton) return;
+                    
+                    findingTabs.querySelectorAll('.finding-tab-btn').forEach(btn => {
+                        btn.classList.remove('text-blue-600', 'border-blue-600');
+                        btn.classList.add('text-gray-500', 'border-transparent');
+                    });
+                    tabButton.classList.add('text-blue-600', 'border-blue-600');
+                    
+                    const modalContent = tabButton.closest('.modal-content');
+                    modalContent.querySelectorAll('.finding-tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(tabButton.dataset.target).classList.remove('hidden');
+                });
+            }
+        });
+    </script>
 </body>
 </html>
