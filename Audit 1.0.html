@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EHS Intelligence Platform - Audit View 9.0</title>
-    
+    <title>Audit Intelligence Platform - Audit View 9.0</title>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- Chart.js for Dashboards -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -58,7 +58,7 @@
         .progress-bar {
             transition: width 0.4s ease-in-out;
         }
-        
+
         /* Status Pills for visual indicators */
         .status-pill {
             padding: 0.25rem 0.75rem;
@@ -73,7 +73,7 @@
         .status-overdue { background-color: #fee2e2; color: #991b1b; }
         .status-non-conformance { background-color: #ffedd5; color: #9a3412; }
         .status-area-for-improvement { background-color: #fef9c3; color: #854d0e; }
-        
+
         /* Highlight for navigation */
         .highlight-question {
             transition: all 0.3s ease-in-out;
@@ -88,7 +88,7 @@
         <main class="flex-1 flex flex-col min-h-screen">
             <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
                 <div class="flex items-center">
-                    <h1 class="text-xl font-bold text-indigo-600"><i class="fas fa-shield-alt mr-2"></i> EHS Intelligence</h1>
+                    <h1 class="text-xl font-bold text-indigo-600"><i class="fas fa-shield-alt mr-2"></i> Audit Intelligence</h1>
                 </div>
                  <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
                 <div class="flex items-center space-x-4">
@@ -179,12 +179,12 @@
 
                                             <!-- Right Content Area -->
                                             <div class="w-full md:w-3/4 lg:w-4/5 pt-6" id="assessment-content">
-                                                
+
                                                 <!-- Chapter 1 -->
                                                 <div id="chapter-1" class="chapter-section space-y-4">
                                                     <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 1: Emergency Preparedness</h3>
                                                 </div>
-                                                
+
                                                 <!-- Chapter 2 -->
                                                 <div id="chapter-2" class="chapter-section space-y-4 pt-8">
                                                     <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">Chapter 2: Machine Guarding & Safety</h3>
@@ -295,7 +295,7 @@
             </div>
         </main>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let updateTimeout;
@@ -304,7 +304,7 @@
             // --- Main View Tab Logic ---
             const viewTabs = document.getElementById('view-tabs');
             const mainContentContainer = document.querySelector('#audit-view-page .pt-6');
-            
+
             viewTabs.addEventListener('click', (e) => {
                 const tabButton = e.target.closest('.view-tab-btn');
                 if (!tabButton) return;
@@ -314,7 +314,7 @@
                     btn.classList.add('text-gray-500', 'border-transparent');
                 });
                 tabButton.classList.add('text-indigo-600', 'border-indigo-600');
-                
+
                 const targetId = tabButton.dataset.target;
                 mainContentContainer.querySelectorAll('.view-tab-content').forEach(content => {
                     content.classList[content.id === targetId ? 'remove' : 'add']('hidden');
@@ -387,7 +387,7 @@
                     } else if (target.matches('.auditor-comment, .finding-name, .finding-type')) {
                         shouldUpdate = true;
                     }
-                    
+
                     if (shouldUpdate) {
                         clearTimeout(updateTimeout);
                         updateTimeout = setTimeout(updateAllConnectedTabs, 500);
@@ -435,7 +435,7 @@
                 });
             }, { rootMargin: "-40% 0px -60% 0px", threshold: 0 });
             if (chapterSections.length > 0) chapterSections.forEach(section => { observer.observe(section); });
-            
+
             function updateChapterProgress() {
                 if (!chapterNav) return;
                 chapterSections.forEach(section => {
@@ -570,7 +570,7 @@
                     }
                 }, 100);
             });
-            
+
             function initializeAuditState() {
                 document.querySelectorAll('input[name$="_score"]:checked').forEach(radio => updateScorePill(radio));
                 updateChapterProgress();
@@ -581,4 +581,3 @@
     </script>
 </body>
 </html>
-
