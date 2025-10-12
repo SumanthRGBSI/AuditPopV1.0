@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EHS Intelligence Platform</title>
+    <title>EHS Intelligence Platform - Audit View</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -84,14 +84,19 @@
             border-left: 4px solid transparent;
         }
         .chapter-tile.active {
-            background-color: #eef2ff; /* A light blue for active state */
-            border-left-color: #3b82f6; /* Blue border for active state */
-            color: #1e40af; /* Darker blue text for active state */
+            background-color: #eef2ff;
+            border-left-color: #3b82f6;
             transform: translateX(4px);
         }
         .chapter-tile.active .font-semibold {
              font-weight: 700;
         }
+
+        /* NEW styles for the subtle progress bar */
+        .progress-bar {
+            transition: width 0.4s ease-in-out;
+        }
+
     </style>
 </head>
 <body class="text-gray-800">
@@ -103,10 +108,7 @@
                 <div class="flex items-center">
                     <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-shield-alt mr-2"></i> EHS Intelligence</h1>
                 </div>
-                 <div class="flex items-center">
-                    <button id="breadcrumb-back" class="text-gray-500 hover:text-gray-700 mr-4 hidden"><i class="fas fa-arrow-left"></i></button>
-                    <h2 id="page-title" class="text-xl font-semibold text-gray-800">All Audits</h2>
-                </div>
+                 <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
                 <div class="flex items-center space-x-4">
                     <button class="text-gray-500 hover:text-gray-700"><i class="fas fa-bell"></i></button>
                     <a href="#" class="flex items-center text-gray-600 hover:bg-gray-50 rounded-lg p-2">
@@ -119,41 +121,6 @@
             </header>
 
             <div class="flex-1 p-6">
-                
-                <!-- PAGE: Audit List -->
-                <div id="audit-list-page" class="page">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">Audits</h2>
-                         <button class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-sm hover:bg-blue-700 flex items-center" onclick="showPage('audit-create-page')">
-                            <i class="fas fa-plus mr-2"></i> Create Audit
-                        </button>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Status: All</option></select>
-                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Audit Type: All</option></select>
-                            <select class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"><option>Auditor: All</option></select>
-                            <input type="date" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500">
-                            <button class="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-800 w-full flex items-center justify-center"><i class="fas fa-filter mr-2"></i> Apply</button>
-                        </div>
-                    </div>
-                    <div class="bg-white shadow-sm rounded-xl overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full leading-normal text-sm">
-                                <thead class="bg-gray-50"><tr class="border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase"><th class="px-5 py-3">Audit Details</th><th class="px-5 py-3">Status</th><th class="px-5 py-3">Personnel</th><th class="px-5 py-3">Key Dates</th><th class="px-5 py-3">Score</th><th class="px-5 py-3">Action</th></tr></thead>
-                                <tbody>
-                                    <tr class="border-b border-gray-200"><td class="px-5 py-4"><p class="font-bold">AUD-2025-001</p><p class="text-sm text-gray-600">Supplier Audit - Routine Check</p></td><td class="px-5 py-4"><span class="status-pill status-in-progress">In Progress</span><p class="text-xs mt-1">CAPA: <span class="status-pill status-awaiting-response">Awaiting</span></p></td><td class="px-5 py-4 text-sm"><p><strong>Auditee:</strong> ACME Corp.</p><p><strong>Auditor(s):</strong> Jane Smith</p></td><td class="px-5 py-4 text-sm"><p><strong>Req:</strong> 2025-06-01</p><p><strong>Sub:</strong> 2025-07-15</p></td><td class="px-5 py-4 font-bold">--</td><td class="px-5 py-4"><button class="text-blue-600 hover:text-blue-800" onclick="showPage('audit-view-page')" title="View Audit"><i class="fas fa-eye text-lg"></i></button></td></tr>
-                                    <tr class="border-b border-gray-200"><td class="px-5 py-4"><p class="font-bold">AUD-2025-002</p><p class="text-sm text-gray-600">Internal Process Audit</p></td><td class="px-5 py-4"><span class="status-pill status-completed">Completed</span></td><td class="px-5 py-4 text-sm"><p><strong>Auditee:</strong> Finance Dept.</p><p><strong>Auditor(s):</strong> Mike Johnson</p></td><td class="px-5 py-4 text-sm"><p><strong>Req:</strong> 2025-05-10</p><p><strong>Sub:</strong> 2025-06-05</p></td><td class="px-5 py-4 font-bold">92%</td><td class="px-5 py-4"><button class="text-blue-600 hover:text-blue-800" onclick="showPage('audit-view-page')" title="View Audit"><i class="fas fa-eye text-lg"></i></button></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PAGE: Audit Create -->
-                <div id="audit-create-page" class="page">
-                    <!-- This page content can be added based on the original prototype, but with improved styling -->
-                </div>
                 
                 <!-- PAGE: Audit View -->
                 <div id="audit-view-page" class="page active">
@@ -200,21 +167,37 @@
                                             <!-- Left Sidebar Navigation -->
                                             <aside class="w-full md:w-1/4 lg:w-1/5 md:sticky md:top-32 md:self-start">
                                                 <nav id="chapter-nav" class="space-y-1">
-                                                    <a href="#chapter-1" class="chapter-tile active group flex flex-col p-3 rounded-md hover:bg-gray-100">
-                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600">Chapter 1: Emergency Preparedness</span>
-                                                        <span class="text-xs text-gray-500 mt-1">Score: <b>4/6</b> | Findings: <b>1</b></span>
+                                                    <a href="#chapter-1" class="chapter-tile active group block p-3 rounded-lg hover:bg-gray-50 relative overflow-hidden">
+                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600 text-sm">Chapter 1: Emergency Preparedness</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/0 Qs</span>
+                                                            <span class="text-xs text-gray-500">Findings: <b>1</b></span>
+                                                        </div>
+                                                        <div class="progress-bar absolute bottom-0 left-0 h-1 bg-blue-500 rounded" style="width: 0%;"></div>
                                                     </a>
-                                                    <a href="#chapter-2" class="chapter-tile group flex flex-col p-3 rounded-md hover:bg-gray-100">
-                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600">Chapter 2: Machine Guarding & Safety</span>
-                                                        <span class="text-xs text-gray-500 mt-1">Score: <b>1/4</b> | Findings: <b>1</b></span>
+                                                    <a href="#chapter-2" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50 relative overflow-hidden">
+                                                         <span class="font-semibold text-gray-800 group-hover:text-blue-600 text-sm">Chapter 2: Machine Guarding & Safety</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/0 Qs</span>
+                                                            <span class="text-xs text-gray-500">Findings: <b>1</b></span>
+                                                        </div>
+                                                        <div class="progress-bar absolute bottom-0 left-0 h-1 bg-blue-500 rounded" style="width: 0%;"></div>
                                                     </a>
-                                                    <a href="#chapter-3" class="chapter-tile group flex flex-col p-3 rounded-md hover:bg-gray-100">
-                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600">Chapter 3: Chemical Safety & Handling</span>
-                                                        <span class="text-xs text-gray-500 mt-1">Score: <b>N/A</b> | Findings: <b>0</b></span>
+                                                     <a href="#chapter-3" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50 relative overflow-hidden">
+                                                         <span class="font-semibold text-gray-800 group-hover:text-blue-600 text-sm">Chapter 3: Chemical Safety & Handling</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/0 Qs</span>
+                                                            <span class="text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="progress-bar absolute bottom-0 left-0 h-1 bg-blue-500 rounded" style="width: 0%;"></div>
                                                     </a>
-                                                    <a href="#chapter-4" class="chapter-tile group flex flex-col p-3 rounded-md hover:bg-gray-100">
-                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600">Chapter 4: Electrical Safety</span>
-                                                        <span class="text-xs text-gray-500 mt-1">Score: <b>N/A</b> | Findings: <b>0</b></span>
+                                                    <a href="#chapter-4" class="chapter-tile group block p-3 rounded-lg hover:bg-gray-50 relative overflow-hidden">
+                                                        <span class="font-semibold text-gray-800 group-hover:text-blue-600 text-sm">Chapter 4: Electrical Safety</span>
+                                                        <div class="flex justify-between items-center mt-2">
+                                                            <span class="progress-text text-xs text-gray-500 font-medium">0/0 Qs</span>
+                                                            <span class="text-xs text-gray-500">Findings: <b>0</b></span>
+                                                        </div>
+                                                        <div class="progress-bar absolute bottom-0 left-0 h-1 bg-blue-500 rounded" style="width: 0%;"></div>
                                                     </a>
                                                 </nav>
                                             </aside>
@@ -229,7 +212,11 @@
                                                     <!-- Question 1.2 -->
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">1.2 - Is fire extinguisher maintenance up to date?</span><span>Score: <b class="text-blue-600">2</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q1.2_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q1.2_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q1.2_score" class="mr-2" checked> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                     <!-- Question 1.3 -->
-                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">1.3 - Are first aid kits readily available and fully stocked?</span><span>Score: <b class="text-blue-600">0</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2" checked> Score 0</label><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">1.3 - Are first aid kits readily available and fully stocked?</span><span>Score: <b class="text-blue-600">0</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2" checked> Score 0</label><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q1.3_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments...">One kit is missing bandages.</textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody><tr class="finding-row"> <td class="py-1 pr-2">1</td> <td class="p-1">First aid kit incomplete</td> <td class="p-1">Area for Improvement</td> <td class="py-1 pl-2 text-center"> <button class="text-gray-500 hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button> </td> </tr></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                     <!-- Question 1.4 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">1.4 - Are evacuation routes clearly posted and drills conducted regularly?</span><span>Score: <b class="text-blue-600">1</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q1.4_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q1.4_score" class="mr-2" checked> Score 1</label><label class="flex items-center"><input type="radio" name="q1.4_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                     <!-- Question 1.5 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">1.5 - Is there a designated and known emergency assembly point?</span><span>Score: <b class="text-blue-600">2</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q1.5_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q1.5_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q1.5_score" class="mr-2" checked> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                 </div>
                                                 <!-- Chapter 2 -->
                                                 <div id="chapter-2" class="chapter-section pt-8 space-y-4">
@@ -238,6 +225,12 @@
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">2.1 - Are all rotating parts and pinch points on machinery properly guarded?</span><span>Score: <b class="text-blue-600">1</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2" checked> Score 1</label><label class="flex items-center"><input type="radio" name="q2.1_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                     <!-- Question 2.2 -->
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">2.2 - Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?</span><span>Score: <b class="text-blue-600">0</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.2_score" class="mr-2" checked> Score 0</label><label class="flex items-center"><input type="radio" name="q2.2_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q2.2_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                    <!-- Question 2.3 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">2.3 - Are emergency stop buttons easily accessible and functional?</span><span>Score: <b class="text-blue-600">2</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.3_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q2.3_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q2.3_score" class="mr-2" checked> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                     <!-- Question 2.4 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">2.4 - Have operators received specific training for the machinery they use?</span><span>Score: <b class="text-blue-600">1</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.4_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q2.4_score" class="mr-2" checked> Score 1</label><label class="flex items-center"><input type="radio" name="q2.4_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                     <!-- Question 2.5 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">2.5 - Are regular safety inspections of machinery documented?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q2.5_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q2.5_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q2.5_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                 </div>
                                                 <!-- Chapter 3 -->
                                                 <div id="chapter-3" class="chapter-section pt-8 space-y-4">
@@ -248,6 +241,10 @@
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">3.2 - Is secondary containment used for liquid chemical storage areas?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q3.2_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q3.2_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q3.2_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                      <!-- Question 3.3 -->
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">3.3 - Are employees trained on the facility's Hazard Communication program?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q3.3_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q3.3_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q3.3_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                    <!-- Question 3.4 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">3.4 - Is appropriate Personal Protective Equipment (PPE) available and used for chemical handling?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q3.4_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q3.4_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q3.4_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                     <!-- Question 3.5 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">3.5 - Are chemical storage areas well-ventilated?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q3.5_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q3.5_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q3.5_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                 </div>
                                                  <!-- Chapter 4 -->
                                                 <div id="chapter-4" class="chapter-section pt-8 space-y-4">
@@ -258,6 +255,10 @@
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">4.2 - Are flexible cords and cables free from damage or fraying?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q4.2_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q4.2_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q4.2_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                     <!-- Question 4.3 -->
                                                     <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">4.3 - Is GFCI protection used in wet or damp locations?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q4.3_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q4.3_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q4.3_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                    <!-- Question 4.4 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">4.4 - Are extension cords used only for temporary purposes and not as permanent wiring?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q4.4_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q4.4_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q4.4_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
+                                                    <!-- Question 4.5 -->
+                                                    <div class="question-container border rounded-lg overflow-hidden"><div class="p-3 flex justify-between items-center text-sm"><span class="font-medium">4.5 - Are all portable electrical tools in good condition and properly grounded?</span><span>Score: <b class="text-gray-500">N/A</b></span></div><div class="p-4 border-t bg-gray-50"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Score</h4><div class="space-y-2"><label class="flex items-center"><input type="radio" name="q4.5_score" class="mr-2"> Score 0</label><label class="flex items-center"><input type="radio" name="q4.5_score" class="mr-2"> Score 1</label><label class="flex items-center"><input type="radio" name="q4.5_score" class="mr-2"> Score 2</label></div><div><label class="font-medium text-sm">Comments</label><textarea class="w-full mt-1 p-2 border rounded-md" rows="3" placeholder="Add comments..."></textarea></div></div><div class="space-y-4"><h4 class="font-semibold text-base border-b pb-2">Findings</h4><table class="w-full text-sm findings-table"><thead><tr class="text-left"><th class="py-1 pr-2 w-8">S.No</th><th class="py-1 px-2">Finding Name</th><th class="py-1 px-2">Finding Type</th><th class="py-1 pl-2 w-16"></th></tr></thead><tbody></tbody></table><button class="add-finding-btn text-sm text-blue-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -417,49 +418,6 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // --- SPA Navigation Logic ---
-            const pages = document.querySelectorAll('.page');
-            const pageTitle = document.getElementById('page-title');
-            const breadcrumbBack = document.getElementById('breadcrumb-back');
-            let pageHistory = ['audit-list-page'];
-
-            const showPage = (pageId, isBack = false) => {
-                pages.forEach(p => p.classList.remove('active'));
-                const targetPage = document.getElementById(pageId);
-                if (targetPage) {
-                    targetPage.classList.add('active');
-                    let newTitle = "All Audits";
-                    if (pageId === 'audit-view-page') {
-                        newTitle = 'Audit Details';
-                    } else if (pageId === 'audit-create-page') {
-                        newTitle = 'Create Audit';
-                    }
-                    pageTitle.textContent = newTitle;
-                    
-                    if (!isBack && pageHistory[pageHistory.length - 1] !== pageId) {
-                        pageHistory.push(pageId);
-                    } else {
-                        // If we are showing the audit view page, make sure the assessment tab is active by default
-                         if (pageId === 'audit-view-page') {
-                            // Find the assessment button and click it to reset the view
-                            const assessmentButton = document.querySelector('.view-tab-btn[data-target="view-assessment"]');
-                            if(assessmentButton) assessmentButton.click();
-                         }
-                    }
-
-                    breadcrumbBack.classList.toggle('hidden', pageId === 'audit-list-page');
-                }
-            };
-
-            breadcrumbBack.addEventListener('click', () => {
-                if (pageHistory.length > 1) {
-                    pageHistory.pop();
-                    showPage(pageHistory[pageHistory.length - 1], true);
-                }
-            });
-
-            window.showPage = showPage;
-
             // --- Audit View Tab Logic ---
             const auditViewPage = document.getElementById('audit-view-page');
             const viewTabs = document.getElementById('view-tabs');
@@ -501,13 +459,13 @@
                 phaseButton.classList.add('text-blue-600', 'border-blue-600');
 
                 document.querySelectorAll('.assessment-phase').forEach(phase => {
-                    phase.classList.add('hidden');
                     phase.classList.remove('active');
+                    phase.classList.add('hidden');
                 });
                 const targetPhase = document.getElementById(`phase-${phaseButton.dataset.phase}`);
                 if (targetPhase) {
-                    targetPhase.classList.remove('hidden');
                     targetPhase.classList.add('active');
+                    targetPhase.classList.remove('hidden');
                 }
             });
 
@@ -550,9 +508,7 @@
             // --- CHAPTER NAVIGATION AND SCROLL-SPY ---
             const chapterNav = document.getElementById('chapter-nav');
             const chapterSections = document.querySelectorAll('.chapter-section');
-            const contentPane = document.querySelector('#assessment-content'); // Scroll container
 
-            // 1. Click to scroll
             if(chapterNav) {
                 chapterNav.addEventListener('click', (e) => {
                     const link = e.target.closest('a');
@@ -566,22 +522,19 @@
                 });
             }
 
-            // 2. Highlight tile on scroll
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const id = entry.target.getAttribute('id');
                     const navLink = chapterNav.querySelector(`a[href="#${id}"]`);
                     if (entry.isIntersecting) {
-                        // Remove active from all others first
                         chapterNav.querySelectorAll('a').forEach(link => link.classList.remove('active'));
-                        // Add active to the current one
                         if (navLink) {
                             navLink.classList.add('active');
                         }
                     }
                 });
             }, { 
-                rootMargin: "-40% 0px -60% 0px", // a threshold line slightly above center
+                rootMargin: "-40% 0px -60% 0px",
                 threshold: 0 
             });
 
@@ -590,7 +543,45 @@
                     observer.observe(section);
                 });
             }
+            
+            // --- CHAPTER PROGRESS BAR LOGIC ---
+            const updateChapterProgress = () => {
+                if (!chapterNav) return;
+                chapterSections.forEach(section => {
+                    const chapterId = section.getAttribute('id');
+                    const questions = section.querySelectorAll('.question-container');
+                    const totalQuestions = questions.length;
+                    
+                    let answeredQuestions = 0;
+                    questions.forEach(q => {
+                        if (q.querySelector('input[type="radio"]:checked')) {
+                            answeredQuestions++;
+                        }
+                    });
 
+                    const percentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
+                    
+                    const navTile = chapterNav.querySelector(`.chapter-tile[href="#${chapterId}"]`);
+                    if (navTile) {
+                        const progressBar = navTile.querySelector('.progress-bar');
+                        const progressText = navTile.querySelector('.progress-text');
+
+                        if (progressBar) progressBar.style.width = `${percentage}%`;
+                        if (progressText) progressText.textContent = `${answeredQuestions}/${totalQuestions} Qs`;
+                    }
+                });
+            };
+            
+            updateChapterProgress(); // Initial Update
+            
+            const assessmentContent = document.getElementById('assessment-content');
+            if (assessmentContent) {
+                assessmentContent.addEventListener('change', (e) => {
+                    if (e.target.matches('input[type="radio"]')) {
+                        updateChapterProgress();
+                    }
+                });
+            }
 
             // --- Modal Logic ---
             const openModal = (modalId) => {
@@ -627,7 +618,7 @@
             let overallScoreChart, scoreByGroupChart;
             const setupScoreCharts = () => {
                 const overallCtx = document.getElementById('overallScoreChart');
-                const overallScore = 55; // New overall score
+                const overallScore = 55;
                 document.getElementById('overallScoreText').textContent = `${overallScore}%`;
 
                 if (overallCtx) {
@@ -699,3 +690,4 @@
     </script>
 </body>
 </html>
+
