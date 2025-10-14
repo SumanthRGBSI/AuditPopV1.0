@@ -66,3 +66,19 @@ body {
     transition: all 0.3s ease-in-out;
     box-shadow: 0 0 0 2px #4f46e5, 0 0 15px rgba(79, 70, 229, 0.5);
 }
+
+.critical-failure {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2;
+    box-shadow: 0 0 0 2px #ef4444;
+}
+
+.critical-failure .bg-gray-50 {
+    background-color: #fee2e2;
+}
+
+.checkpoint-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}

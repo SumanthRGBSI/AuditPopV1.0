@@ -26,14 +26,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- DEMO DATA ---
     const demoData = { "q1.1": { supplierScore: 3, auditorScore: 3, auditorComment: "All exits are clear and well-lit. Excellent." }, "q1.2": { supplierScore: 3, auditorScore: 2, auditorComment: "Log indicates maintenance was due last week for extinguishers on the west wall.", findings: [{ name: "Extinguisher maintenance overdue", type: "Area for Improvement" }] }, "q1.3": { supplierScore: 2, auditorScore: 1, auditorComment: "First aid kit in assembly area is missing bandages and antiseptic wipes.", findings: [{ name: "Incomplete first aid kit", type: "Non-Conformance" }] }, "q1.4": { supplierScore: 3, auditorScore: 3, auditorComment: "Drill logs are up to date and routes are clearly posted." }, "q2.1": { supplierScore: 2, auditorScore: 1, auditorComment: "Guard on lathe #3 is cracked and has been temporarily repaired with duct tape.", findings: [{ name: "Cracked machine guard", type: "Non-Conformance" }, { name: "Improper guard repair", type: "Non-Conformance" }] }, "q2.2": { supplierScore: 3, auditorScore: 3, auditorComment: "Observed proper LOTO procedure during maintenance of the conveyor belt." }, "q2.3": { supplierScore: 3, auditorScore: 2, auditorComment: "E-stop on the main press is partially obstructed by a waste bin." , findings: [{ name: "Obstructed E-stop button", type: "Area for Improvement" }] }, "q3.1": { supplierScore: 3, auditorScore: 3, auditorComment: "Digital SDS database is easily accessible from all workstations." }, "q3.2": { supplierScore: 2, auditorScore: 2, auditorComment: "Secondary containment for the main chemical storage is adequate, but a temporary drum storage area lacks it.", findings: [{ name: "Lack of secondary containment for temporary storage", type: "Area for Improvement" }] }, "q4.1": { supplierScore: 3, auditorScore: 2, auditorComment: "Panel 4B has pallets stored within the 3-foot clearance zone.", findings: [{ name: "Obstructed electrical panel", type: "Non-Conformance" }] }, "q4.2": { supplierScore: 2, auditorScore: 1, auditorComment: "Extension cord running to the ventilation fan is frayed near the plug.", findings: [{ name: "Frayed extension cord in use", type: "Non-Conformance" }] },};
     const auditQuestions = {
-        "chapter-1": { title: "Emergency Preparedness", questions: [ "Are emergency exits clearly marked and unobstructed?", "Is fire extinguisher maintenance up to date?", "Are first aid kits readily available and fully stocked?", "Are evacuation routes clearly posted and drills conducted regularly?", "Is there a designated and known emergency assembly point?" ]},
-        "chapter-2": { title: "Machine Guarding & Safety", questions: [ "Are all rotating parts and pinch points on machinery properly guarded?", "Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?", "Are emergency stop buttons easily accessible and functional?", "Have operators received specific training for the machinery they use?", "Are regular safety inspections of machinery documented?" ]},
-        "chapter-3": { title: "Chemical Safety & Handling", questions: [ "Are Safety Data Sheets (SDS) readily accessible for all hazardous chemicals?", "Is secondary containment used for liquid chemical storage areas?", "Are employees trained on the facility's Hazard Communication program?", "Is appropriate Personal Protective Equipment (PPE) available and used for chemical handling?", "Are chemical storage areas well-ventilated and labeled correctly?" ]},
-        "chapter-4": { title: "Electrical Safety", questions: [ "Are electrical panels clear and unobstructed for at least 3 feet?", "Are flexible cords and cables free from damage or fraying?", "Is GFCI protection used in wet or damp locations?", "Are extension cords used only for temporary purposes and not as permanent wiring?", "Are all portable electrical tools in good condition and properly grounded?" ]}
+        "chapter-1": {
+            title: "Emergency Preparedness",
+            questions: [
+                { text: "Are emergency exits clearly marked and unobstructed?" },
+                { text: "Is fire extinguisher maintenance up to date?", isCheckpoint: true, minScore: 2 },
+                { text: "Are first aid kits readily available and fully stocked?" },
+                { text: "Are evacuation routes clearly posted and drills conducted regularly?" },
+                { text: "Is there a designated and known emergency assembly point?" }
+            ]
+        },
+        "chapter-2": {
+            title: "Machine Guarding & Safety",
+            questions: [
+                { text: "Are all rotating parts and pinch points on machinery properly guarded?", isCheckpoint: true, minScore: 2 },
+                { text: "Is Lockout/Tagout (LOTO) procedure followed for equipment maintenance?" },
+                { text: "Are emergency stop buttons easily accessible and functional?" },
+                { text: "Have operators received specific training for the machinery they use?" },
+                { text: "Are regular safety inspections of machinery documented?" }
+            ]
+        },
+        "chapter-3": {
+            title: "Chemical Safety & Handling",
+            questions: [
+                { text: "Are Safety Data Sheets (SDS) readily accessible for all hazardous chemicals?" },
+                { text: "Is secondary containment used for liquid chemical storage areas?" },
+                { text: "Are employees trained on the facility's Hazard Communication program?" },
+                { text: "Is appropriate Personal Protective Equipment (PPE) available and used for chemical handling?" },
+                { text: "Are chemical storage areas well-ventilated and labeled correctly?" }
+            ]
+        },
+        "chapter-4": {
+            title: "Electrical Safety",
+            questions: [
+                { text: "Are electrical panels clear and unobstructed for at least 3 feet?" },
+                { text: "Are flexible cords and cables free from damage or fraying?", isCheckpoint: true, minScore: 2 },
+                { text: "Is GFCI protection used in wet or damp locations?" },
+                { text: "Are extension cords used only for temporary purposes and not as permanent wiring?" },
+                { text: "Are all portable electrical tools in good condition and properly grounded?" }
+            ]
+        }
     };
 
-    function createQuestionHTML(chapterNum, questionNum, questionText, data) {
+    function createQuestionHTML(chapterNum, questionNum, question, data) {
         const qId = `q${chapterNum}.${questionNum}`;
+        const questionText = question.text;
+        const isCheckpoint = question.isCheckpoint;
+        const minScore = question.minScore;
         const hasData = !!data;
         const supplierScoreCheck = (val) => hasData && data.supplierScore === val ? 'checked' : '';
         const auditorScoreCheck = (val) => hasData && data.auditorScore === val ? 'checked' : '';
@@ -42,19 +81,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (hasData && data.findings && data.findings.length > 0) {
             findingsHTML = data.findings.map(finding => `<div class="finding-row bg-white p-2 border rounded-md flex items-center gap-3"><input type="text" class="finding-name flex-grow p-1.5 border-0 rounded-md text-sm focus:ring-1 focus:ring-indigo-500" value="${finding.name}" placeholder="Finding Name..."><select class="finding-type p-1.5 border-0 rounded-md text-sm bg-transparent focus:ring-1 focus:ring-indigo-500"><option value="">Select Type</option><option ${finding.type === 'Area for Improvement' ? 'selected' : ''}>Area for Improvement</option><option ${finding.type === 'Non-Conformance' ? 'selected' : ''}>Non-Conformance</option></select><div class="text-gray-400 space-x-2"><button class="hover:text-indigo-600"><i class="fas fa-paperclip"></i></button><button class="hover:text-red-600 remove-finding-btn"><i class="fas fa-trash"></i></button></div></div>`).join('');
         }
-        return `<div class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" data-question-id="${qId}" data-question-text="${questionText}"><div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center"><h4 class="font-semibold text-gray-800 pr-4">${chapterNum}.${questionNum} - ${questionText}</h4><span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">Score: <b class="score-display text-gray-700 font-bold">N/A</b></span></div><div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="space-y-4"><div class="grid grid-cols-2 gap-6"><div><label class="text-sm font-semibold text-gray-700">Supplier Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div><div><label class="text-sm font-semibold text-gray-700">Auditor Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div></div><div><label class="text-sm font-semibold text-gray-700">Supplier Comments</label><textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea></div><div><label class="text-sm font-semibold text-gray-700 flex items-center justify-between"><span>Auditor Comments</span><span class="text-gray-400 space-x-3"><i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i><i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i></span></label><textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments...">${auditorComment}</textarea></div></div><div><h5 class="font-semibold text-gray-800 mb-2">Findings</h5><div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">${findingsHTML}</div><button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div>`;
+        const checkpointIndicator = isCheckpoint ? `<span class="checkpoint-indicator" title="Stopping Parameter Checkpoint"><i class="fas fa-shield-alt text-amber-500 mr-2"></i></span>` : '';
+        const flagIcon = `<i class="fas fa-flag flag-icon text-gray-300 hover:text-blue-500 cursor-pointer" title="Flag for follow-up"></i>`;
+        return `<div class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" data-question-id="${qId}" data-question-text="${questionText}" ${isCheckpoint ? `data-is-checkpoint="true" data-min-score="${minScore}"` : ''} data-flagged="false"><div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center"><h4 class="font-semibold text-gray-800 pr-4 flex items-center">${checkpointIndicator}${chapterNum}.${questionNum} - ${questionText}</h4><div class="flex items-center gap-4">${flagIcon}<span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">Score: <b class="score-display text-gray-700 font-bold">N/A</b></span></div></div><div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6"><div class="space-y-4"><div class="grid grid-cols-2 gap-6"><div><label class="text-sm font-semibold text-gray-700">Supplier Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_supplier_score" ${supplierScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div><div><label class="text-sm font-semibold text-gray-700">Auditor Score</label><div class="mt-2 space-y-2"><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(3)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="3"> None (3)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(2)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="2"> Low (2)</label><label class="flex items-center text-sm cursor-pointer"><input type="radio" name="${qId}_score" ${auditorScoreCheck(1)} class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" value="1"> High (1)</label></div></div></div><div><label class="text-sm font-semibold text-gray-700">Supplier Comments</label><textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea></div><div><label class="text-sm font-semibold text-gray-700 flex items-center justify-between"><span>Auditor Comments</span><span class="text-gray-400 space-x-3"><i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i><i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i></span></label><textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments...">${auditorComment}</textarea></div></div><div><h5 class="font-semibold text-gray-800 mb-2">Findings</h5><div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">${findingsHTML}</div><button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline"><i class="fas fa-plus-circle mr-1"></i> Add Finding</button></div></div></div>`;
     }
 
     for (const chapterKey in auditQuestions) {
         const chapterNum = chapterKey.split('-')[1];
         const chapterElement = document.getElementById(chapterKey);
         const questions = auditQuestions[chapterKey].questions;
-        questions.forEach((qText, index) => {
+        let chapterHTML = '';
+        questions.forEach((question, index) => {
             const qNum = index + 1;
             const qId = `q${chapterNum}.${qNum}`;
             const data = demoData[qId];
-            chapterElement.innerHTML += createQuestionHTML(chapterNum, qNum, qText, data);
+            chapterHTML += createQuestionHTML(chapterNum, qNum, question, data);
         });
+        chapterElement.insertAdjacentHTML('beforeend', chapterHTML);
+    }
+
+    // Explicitly set the checked property for radios based on demoData to ensure state is correct
+    for (const qId in demoData) {
+        const data = demoData[qId];
+        if (data && data.auditorScore) {
+            const radio = document.querySelector(`input[name="${qId}_score"][value="${data.auditorScore}"]`);
+            if (radio) {
+                radio.checked = true;
+            }
+        }
     }
 
     const assessmentContent = document.getElementById('assessment-content');
@@ -74,6 +128,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const findingsContent = row.parentElement;
                 row.remove();
                 if (findingsContent.children.length === 0) findingsContent.innerHTML = '<div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>';
+                updateAllConnectedTabs();
+            }
+
+            const flagIcon = e.target.closest('.flag-icon');
+            if (flagIcon) {
+                const qContainer = flagIcon.closest('.question-container');
+                const isFlagged = qContainer.dataset.flagged === 'true';
+                qContainer.dataset.flagged = !isFlagged;
+                flagIcon.classList.toggle('text-gray-300', isFlagged);
+                flagIcon.classList.toggle('text-blue-600', !isFlagged);
                 updateAllConnectedTabs();
             }
         });
@@ -101,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const scorePill = qContainer.querySelector('.score-pill');
         const scoreDisplay = qContainer.querySelector('.score-display');
         const selectedRadio = qContainer.querySelector(`input[name$="_score"]:checked`);
+
         if (selectedRadio) {
             const score = selectedRadio.value;
             scoreDisplay.textContent = score;
@@ -108,16 +173,71 @@ document.addEventListener('DOMContentLoaded', function() {
             if (score === '1') scorePill.classList.add('bg-red-100', 'text-red-800');
             else if (score === '2') scorePill.classList.add('bg-orange-100', 'text-orange-800');
             else if (score === '3') scorePill.classList.add('bg-green-100', 'text-green-800');
+
+            // Critical Failure Logic
+            if (qContainer.dataset.isCheckpoint === 'true') {
+                const minScore = parseInt(qContainer.dataset.minScore, 10);
+                if (parseInt(score, 10) < minScore) {
+                    qContainer.classList.add('critical-failure');
+                } else {
+                    qContainer.classList.remove('critical-failure');
+                }
+            }
         } else {
             scoreDisplay.textContent = 'N/A';
             scorePill.className = 'score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap';
+            qContainer.classList.remove('critical-failure');
         }
     }
 
     const chapterNav = document.getElementById('chapter-nav');
     const chapterSections = document.querySelectorAll('.chapter-section');
     if(chapterNav) {
+        chapterNav.addEventListener('change', (e) => {
+            if (e.target.classList.contains('quick-apply-score')) {
+                const select = e.target;
+                const score = select.value;
+                if (!score) return;
+
+                const chapterTile = select.closest('.chapter-tile');
+                const chapterId = chapterTile.getAttribute('href').substring(1);
+                const chapterSection = document.getElementById(chapterId);
+
+                chapterSection.querySelectorAll('.question-container').forEach(qContainer => {
+                    const qId = qContainer.dataset.questionId;
+                    const radioToCheck = qContainer.querySelector(`input[name="${qId}_score"][value="${score}"]`);
+                    if (radioToCheck) {
+                        radioToCheck.checked = true;
+                        updateScorePill(radioToCheck);
+                    }
+                });
+
+                updateAllConnectedTabs();
+                select.value = ""; // Reset dropdown
+            }
+        });
+
         chapterNav.addEventListener('click', (e) => {
+            if (e.target.tagName === 'SELECT') {
+                e.preventDefault();
+                return;
+            }
+
+            const flagCount = e.target.closest('.flag-count');
+            if (flagCount) {
+                e.preventDefault();
+                const chapterTile = flagCount.closest('.chapter-tile');
+                const chapterId = chapterTile.getAttribute('href').substring(1);
+                const chapterSection = document.getElementById(chapterId);
+                const firstFlagged = chapterSection.querySelector('[data-flagged="true"]');
+                if (firstFlagged) {
+                    firstFlagged.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstFlagged.classList.add('highlight-question');
+                    setTimeout(() => firstFlagged.classList.remove('highlight-question'), 2500);
+                }
+                return;
+            }
+
             const link = e.target.closest('a');
             if (!link) return;
             e.preventDefault();
@@ -142,10 +262,19 @@ document.addEventListener('DOMContentLoaded', function() {
         chapterSections.forEach(section => {
             const chapterId = section.getAttribute('id');
             const questions = section.querySelectorAll('.question-container');
-            let answered = 0, findingsCount = 0;
+            let answered = 0, findingsCount = 0, criticalFailures = 0, hasCheckpoints = false, flaggedQuestions = 0;
             questions.forEach(q => {
                 if (q.querySelector('input[name$="_score"]:checked')) answered++;
                 findingsCount += q.querySelectorAll('.finding-row').length;
+                if (q.dataset.isCheckpoint === 'true') {
+                    hasCheckpoints = true;
+                    if (q.classList.contains('critical-failure')) {
+                        criticalFailures++;
+                    }
+                }
+                if (q.dataset.flagged === 'true') {
+                    flaggedQuestions++;
+                }
             });
             const percentage = questions.length > 0 ? (answered / questions.length) * 100 : 0;
             const navTile = chapterNav.querySelector(`.chapter-tile[href="#${chapterId}"]`);
@@ -153,6 +282,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 navTile.querySelector('.progress-bar').style.width = `${percentage}%`;
                 navTile.querySelector('.progress-text').textContent = `${answered}/${questions.length} Qs`;
                 navTile.querySelector('.findings-count').innerHTML = `Findings: <b>${findingsCount}</b>`;
+
+                const checkpointIndicator = navTile.querySelector('.checkpoint-tile-indicator');
+                checkpointIndicator.classList.toggle('hidden', !hasCheckpoints);
+
+                const criticalFailuresCount = navTile.querySelector('.critical-failures-count');
+                criticalFailuresCount.innerHTML = `Failures: <b>${criticalFailures}</b>`;
+                criticalFailuresCount.classList.toggle('hidden', criticalFailures === 0);
+
+                const flagCount = navTile.querySelector('.flag-count');
+                flagCount.innerHTML = `<i class="fas fa-flag text-blue-500"></i> <b>${flaggedQuestions}</b>`;
+                flagCount.classList.toggle('hidden', flaggedQuestions === 0);
             }
         });
     };
@@ -164,7 +304,23 @@ document.addEventListener('DOMContentLoaded', function() {
             const chapterData = { id: `chapter-${chapterNum}`, title: auditQuestions[`chapter-${chapterNum}`].title, questions: [], score: 0, maxScore: 0, findingsCount: 0 };
             chap.querySelectorAll('.question-container').forEach(q => {
                 const scoreRadio = q.querySelector('input[name$="_score"]:checked');
-                const questionData = { id: q.dataset.questionId, text: q.dataset.questionText, score: scoreRadio ? parseInt(scoreRadio.value) : 0, maxScore: 3, comment: q.querySelector('.auditor-comment').value, findings: [] };
+                const score = scoreRadio ? parseInt(scoreRadio.value) : 0;
+                const isCheckpoint = q.dataset.isCheckpoint === 'true';
+                const minScore = isCheckpoint ? parseInt(q.dataset.minScore, 10) : null;
+                const isCritical = isCheckpoint && score > 0 && score < minScore;
+
+                const questionData = {
+                    id: q.dataset.questionId,
+                    text: q.dataset.questionText,
+                    score: score,
+                    maxScore: 3,
+                    comment: q.querySelector('.auditor-comment').value,
+                    findings: [],
+                    isCheckpoint: isCheckpoint,
+                    minScore: minScore,
+                    isCritical: isCritical,
+                    isFlagged: q.dataset.flagged === 'true'
+                };
                 q.querySelectorAll('.finding-row').forEach(f => {
                     const name = f.querySelector('.finding-name').value;
                     const type = f.querySelector('.finding-type').value;
@@ -246,15 +402,60 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function generateCriticalSummary() {
+        const auditData = getAuditData();
+        const criticalSummarySection = document.getElementById('critical-summary-section');
+        const criticalSummaryList = document.getElementById('critical-summary-list');
+        criticalSummaryList.innerHTML = '';
+
+        const criticalQuestions = auditData.flatMap(chapter => chapter.questions).filter(q => q.isCritical);
+
+        if (criticalQuestions.length > 0) {
+            criticalQuestions.forEach(q => {
+                const listItem = `<a href="#" data-question-id="${q.id}" class="critical-summary-item block p-2.5 bg-white rounded-md hover:bg-gray-50 border border-gray-200 shadow-sm text-sm">
+                    <span class="font-semibold text-gray-800">${q.id.toUpperCase()}:</span> ${q.text}
+                    <span class="text-xs font-bold text-red-600 float-right bg-red-100 px-2 py-1 rounded">Score: ${q.score} (Min: ${q.minScore})</span>
+                </a>`;
+                criticalSummaryList.innerHTML += listItem;
+            });
+            criticalSummarySection.classList.remove('hidden');
+        } else {
+            criticalSummarySection.classList.add('hidden');
+        }
+    }
+
     function updateAllConnectedTabs() {
         updateChapterProgress();
+
         const activeTab = document.querySelector('.view-tab-btn.text-indigo-600');
         if (!activeTab) return;
+
         const targetId = activeTab.dataset.target;
+
+        // Always generate summary if the assessment tab is active or becomes active
+        if (targetId === 'view-assessment') {
+            generateCriticalSummary();
+        }
+
         if (targetId === 'view-score-details') generateScoreAndDetailsTab();
         else if (targetId === 'view-findings-actions') generateFindingsActionsTab();
         else if (targetId === 'view-report') generateReportTab();
     }
+
+    const assessmentContentForSummary = document.getElementById('assessment-content');
+    assessmentContentForSummary.addEventListener('click', (e) => {
+        const item = e.target.closest('.critical-summary-item');
+        if (item) {
+            e.preventDefault();
+            const questionId = item.dataset.questionId;
+            const questionElement = document.querySelector(`.question-container[data-question-id="${questionId}"]`);
+            if (questionElement) {
+                questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                questionElement.classList.add('highlight-question');
+                setTimeout(() => questionElement.classList.remove('highlight-question'), 2500);
+            }
+        }
+    });
 
     const findingsActionTab = document.getElementById('view-findings-actions');
     findingsActionTab.addEventListener('click', (e) => {
@@ -354,9 +555,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initializeAuditState() {
-        document.querySelectorAll('input[name$="_score"]:checked').forEach(radio => updateScorePill(radio));
-        updateChapterProgress();
+        document.querySelectorAll('.question-container').forEach(qContainer => {
+            const anyRadio = qContainer.querySelector('input[name$="_score"]');
+            if (anyRadio) {
+                updateScorePill(anyRadio);
+            }
+        });
+        // Initial call to sync tabs and generate summary
+        updateAllConnectedTabs();
     }
 
-    initializeAuditState();
+    // Defer initialization to allow the browser to update the DOM state
+    setTimeout(initializeAuditState, 0);
 });
