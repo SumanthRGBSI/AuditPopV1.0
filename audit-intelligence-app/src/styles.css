@@ -1,0 +1,85 @@
+/* You can add global styles to this file, and also import other style files */
+
+.modal-overlay {
+    transition: opacity 0.3s ease;
+}
+.modal-content {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+}
+.modal-overlay.open .modal-content {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+html {
+    scroll-behavior: smooth;
+}
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8fafc;
+}
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #c4c4c4; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+.status-pill {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.status-open { background-color: #e0f2fe; color: #0369a1; }
+.status-overdue { background-color: #fee2e2; color: #991b1b; }
+.status-non-conformance { background-color: #ffedd5; color: #9a3412; }
+.status-area-for-improvement { background-color: #fef9c3; color: #854d0e; }
+
+*:focus-visible {
+    outline: 2px solid #4f46e5 !important;
+    outline-offset: 2px;
+}
+
+.chapter-tile {
+    transition: all 0.2s ease-in-out;
+    border-left: 4px solid transparent;
+}
+.chapter-tile.active {
+    background-color: #eef2ff;
+    border-left-color: #4f46e5;
+}
+.chapter-tile.active .font-semibold {
+     color: #4f46e5;
+}
+
+.progress-bar {
+    transition: width 0.4s ease-in-out;
+}
+
+.highlight-question {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 0 2px #4f46e5, 0 0 15px rgba(79, 70, 229, 0.5);
+}
+
+.critical-failure {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2;
+    box-shadow: 0 0 0 2px #ef4444;
+}
+
+.critical-failure .bg-gray-50 {
+    background-color: #fee2e2;
+}
+
+.checkpoint-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
