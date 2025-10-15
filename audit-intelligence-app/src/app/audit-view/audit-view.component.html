@@ -1,0 +1,222 @@
+<div class="bg-gray-100">
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-h-screen">
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
+            <div class="flex items-center">
+                <h1 class="text-xl font-bold text-indigo-600"><i class="fas fa-shield-alt mr-2"></i> Audit Intelligence</h1>
+            </div>
+            <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-500 hover:text-gray-700"><i class="fas fa-bell"></i></button>
+                <a href="#" class="flex items-center text-gray-600 hover:bg-gray-50 rounded-lg p-2">
+                    <img class="h-8 w-8 rounded-full object-cover" src="https://placehold.co/100x100/E2E8F0/4A5568?text=JD" alt="User avatar">
+                    <div class="ml-3 text-left">
+                        <p class="text-sm font-medium text-gray-800">John Doe</p>
+                    </div>
+                </a>
+            </div>
+        </header>
+
+        <div class="flex-1 p-6">
+            <!-- PAGE: Audit View -->
+            <div id="audit-view-page" class="page active">
+                <div class="border-b border-gray-200 bg-white sticky top-16 z-10 -ml-6 -mr-6 px-6">
+                    <nav class="-mb-px flex space-x-8" id="view-tabs">
+                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-audit-details'" [class.border-indigo-600]="activeTab === 'view-audit-details'" [class.text-gray-500]="activeTab !== 'view-audit-details'" [class.border-transparent]="activeTab !== 'view-audit-details'" (click)="switchTab('view-audit-details')">View Audit</button>
+                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-assessment'" [class.border-indigo-600]="activeTab === 'view-assessment'" [class.text-gray-500]="activeTab !== 'view-assessment'" [class.border-transparent]="activeTab !== 'view-assessment'" (click)="switchTab('view-assessment')">Assessment</button>
+                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-score-details'" [class.border-indigo-600]="activeTab === 'view-score-details'" [class.text-gray-500]="activeTab !== 'view-score-details'" [class.border-transparent]="activeTab !== 'view-score-details'" (click)="switchTab('view-score-details')">Audit Score</button>
+                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-findings-actions'" [class.border-indigo-600]="activeTab === 'view-findings-actions'" [class.text-gray-500]="activeTab !== 'view-findings-actions'" [class.border-transparent]="activeTab !== 'view-findings-actions'" (click)="switchTab('view-findings-actions')">Findings & Actions</button>
+                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-report'" [class.border-indigo-600]="activeTab === 'view-report'" [class.text-gray-500]="activeTab !== 'view-report'" [class.border-transparent]="activeTab !== 'view-report'" (click)="switchTab('view-report')">Audit Report</button>
+                    </nav>
+                </div>
+                <div class="pt-6">
+                    <!-- Assessment Tab -->
+                    <div id="view-assessment" class="view-tab-content" [class.hidden]="activeTab !== 'view-assessment'">
+                        <div class="bg-transparent">
+                            <div class="p-4 bg-white rounded-t-xl border-b sticky top-[128px] z-10">
+                                <nav class="flex space-x-4" id="assessment-phase-tabs">
+                                    <button class="assessment-phase-btn font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 px-2" data-phase="onsite">Onsite Assessment</button>
+                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="offsite">Offsite Assessment</button>
+                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="self">Self Assessment</button>
+                                </nav>
+                            </div>
+
+                            <div id="assessment-phases-container">
+                                <!-- Onsite Phase -->
+                                <div class="assessment-phase active" id="phase-onsite">
+                                    <div class="flex flex-col md:flex-row gap-8">
+                                        <!-- Left Sidebar Navigation -->
+                                        <aside class="w-full md:w-1/4 lg:w-1/5 md:sticky md:top-48 md:self-start pt-6">
+                                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Chapters</h3>
+                                            <nav id="chapter-nav" class="space-y-1">
+                                                <a *ngFor="let chapter of objectKeys(auditQuestions); let i = index" [href]="'#chapter-' + (i + 1)" class="chapter-tile active group block p-3 rounded-lg hover:bg-gray-50">
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="font-semibold text-gray-800 text-sm">{{ auditQuestions[chapter].title }}</span>
+                                                        <div class="relative inline-block text-left">
+                                                            <select class="quick-apply-score text-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                                                <option value="">Quick Apply</option>
+                                                                <option value="3">Score: 3</option>
+                                                                <option value="2">Score: 2</option>
+                                                                <option value="1">Score: 1</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
+                                                        <span class="progress-text font-medium">0/5 Qs</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="checkpoint-tile-indicator hidden" title="Contains Stopping Parameter Checkpoints"><i class="fas fa-shield-alt text-amber-500"></i></span>
+                                                            <span class="critical-failures-count font-medium text-red-600 hidden">Failures: <b>0</b></span>
+                                                            <span class="flag-count hidden" title="Flagged Questions"><i class="fas fa-flag text-blue-500"></i> <b>0</b></span>
+                                                            <span class="findings-count">Findings: <b>0</b></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                        <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                    </div>
+                                                </a>
+                                            </nav>
+                                        </aside>
+
+                                        <!-- Right Content Area -->
+                                        <div class="w-full md:w-3/4 lg:w-4/5 pt-6" id="assessment-content">
+
+                                            <!-- Critical Failures Summary -->
+                                            <div id="critical-summary-section" class="mb-6 p-4 rounded-lg bg-red-100 border border-red-200 hidden">
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-4"></i>
+                                                    <div>
+                                                        <h3 class="font-bold text-red-800">Critical Failures Detected</h3>
+                                                        <p class="text-sm text-red-700">The following stopping parameter checkpoints have failed. Please review immediately.</p>
+                                                    </div>
+                                                </div>
+                                                <div id="critical-summary-list" class="mt-4 space-y-2">
+                                                    <!-- Dynamic content will be inserted here -->
+                                                </div>
+                                            </div>
+
+                                            <div *ngFor="let chapterKey of objectKeys(auditQuestions); let i = index" [id]="'chapter-' + (i + 1)" class="chapter-section space-y-4 pt-8">
+                                                <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">{{ auditQuestions[chapterKey].title }}</h3>
+                                                <div *ngFor="let question of auditQuestions[chapterKey].questions; let j = index"
+                                                     class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                                                     [attr.data-question-id]="'q' + (i + 1) + '.' + (j + 1)"
+                                                     [attr.data-question-text]="question.text"
+                                                     [attr.data-is-checkpoint]="question.isCheckpoint"
+                                                     [attr.data-min-score]="question.minScore"
+                                                     data-flagged="false">
+                                                  <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                                                    <h4 class="font-semibold text-gray-800 pr-4 flex items-center">
+                                                      <span *ngIf="question.isCheckpoint" class="checkpoint-indicator" title="Stopping Parameter Checkpoint">
+                                                        <i class="fas fa-shield-alt text-amber-500 mr-2"></i>
+                                                      </span>
+                                                      {{ i + 1 }}.{{ j + 1 }} - {{ question.text }}
+                                                    </h4>
+                                                    <div class="flex items-center gap-4">
+                                                      <i class="fas fa-flag flag-icon text-gray-300 hover:text-blue-500 cursor-pointer" title="Flag for follow-up"></i>
+                                                      <span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">
+                                                        Score: <b class="score-display text-gray-700 font-bold">N/A</b>
+                                                      </span>
+                                                    </div>
+                                                  </div>
+                                                  <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                                    <div class="space-y-4">
+                                                      <div class="grid grid-cols-2 gap-6">
+                                                        <div>
+                                                          <label class="text-sm font-semibold text-gray-700">Supplier Score</label>
+                                                          <div class="mt-2 space-y-2">
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> None (3)
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> Low (2)
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> High (1)
+                                                            </label>
+                                                          </div>
+                                                        </div>
+                                                        <div>
+                                                          <label class="text-sm font-semibold text-gray-700">Auditor Score</label>
+                                                          <div class="mt-2 space-y-2">
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> None (3)
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> Low (2)
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> High (1)
+                                                            </label>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                      <div>
+                                                        <label class="text-sm font-semibold text-gray-700">Supplier Comments</label>
+                                                        <textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea>
+                                                      </div>
+                                                      <div>
+                                                        <label class="text-sm font-semibold text-gray-700 flex items-center justify-between">
+                                                          <span>Auditor Comments</span>
+                                                          <span class="text-gray-400 space-x-3">
+                                                            <i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i>
+                                                            <i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i>
+                                                          </span>
+                                                        </label>
+                                                        <textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments..."></textarea>
+                                                      </div>
+                                                    </div>
+                                                    <div>
+                                                      <h5 class="font-semibold text-gray-800 mb-2">Findings</h5>
+                                                      <div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">
+                                                          <div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>
+                                                      </div>
+                                                      <button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline">
+                                                        <i class="fas fa-plus-circle mr-1"></i> Add Finding
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Score and Details Tab -->
+                    <div id="view-score-details" class="view-tab-content" [class.hidden]="activeTab !== 'view-score-details'">
+                       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm text-center">
+                                <h3 class="font-semibold text-lg mb-4">Overall Score</h3>
+                                <div class="relative w-48 h-48 mx-auto">
+                                    <canvas #overallScoreChart></canvas>
+                                    <div id="overallScoreText" class="absolute inset-0 flex items-center justify-center text-4xl font-bold text-indigo-600">{{ overallScore }}%</div>
+                                </div>
+                            </div>
+                            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm">
+                                <h3 class="font-semibold text-lg mb-4">Score by Chapter</h3>
+                                <canvas #scoreByChapterChart height="150"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm">
+                            <h3 class="text-lg font-semibold mb-4">Score Breakdown</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm" id="score-breakdown-table">
+                                    <thead class="bg-gray-50"><tr class="text-left text-xs font-semibold text-gray-600 uppercase"><th class="p-3">Chapter</th><th class="p-3">Score</th><th class="p-3">Max Score</th><th class="p-3">Percentage</th><th class="p-3">Findings</th></tr></thead>
+                                    <tbody>
+                                        <tr *ngFor="let item of scoreBreakdown" class="border-b">
+                                            <td class="p-3 font-medium">{{ item.title }}</td>
+                                            <td class="p-3">{{ item.score }}</td>
+                                            <td class="p-3">{{ item.maxScore }}</td>
+                                            <td class="p-3 font-semibold">{{ item.percentage }}%</td>
+                                            <td class="p-3">{{ item.findingsCount }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
