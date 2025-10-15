@@ -5,7 +5,10 @@
             <div class="flex items-center">
                 <h1 class="text-xl font-bold text-indigo-600"><i class="fas fa-shield-alt mr-2"></i> Audit Intelligence</h1>
             </div>
-            <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
+            <div>
+                <h2 id="page-title" class="text-xl font-semibold text-gray-800">Supplier Audit - AUD-2025-001</h2>
+                <p class="text-sm text-gray-500">Total Findings: <span class="font-bold">{{ totalFindings }}</span></p>
+            </div>
             <div class="flex items-center space-x-4">
                 <button class="text-gray-500 hover:text-gray-700"><i class="fas fa-bell"></i></button>
                 <a href="#" class="flex items-center text-gray-600 hover:bg-gray-50 rounded-lg p-2">
@@ -24,7 +27,6 @@
                     <nav class="-mb-px flex space-x-8" id="view-tabs">
                         <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-audit-details'" [class.border-indigo-600]="activeTab === 'view-audit-details'" [class.text-gray-500]="activeTab !== 'view-audit-details'" [class.border-transparent]="activeTab !== 'view-audit-details'" (click)="switchTab('view-audit-details')">View Audit</button>
                         <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-assessment'" [class.border-indigo-600]="activeTab === 'view-assessment'" [class.text-gray-500]="activeTab !== 'view-assessment'" [class.border-transparent]="activeTab !== 'view-assessment'" (click)="switchTab('view-assessment')">Assessment</button>
-                        <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-score-details'" [class.border-indigo-600]="activeTab === 'view-score-details'" [class.text-gray-500]="activeTab !== 'view-score-details'" [class.border-transparent]="activeTab !== 'view-score-details'" (click)="switchTab('view-score-details')">Audit Score</button>
                         <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-findings-actions'" [class.border-indigo-600]="activeTab === 'view-findings-actions'" [class.text-gray-500]="activeTab !== 'view-findings-actions'" [class.border-transparent]="activeTab !== 'view-findings-actions'" (click)="switchTab('view-findings-actions')">Findings & Actions</button>
                         <button class="view-tab-btn" [class.text-indigo-600]="activeTab === 'view-report'" [class.border-indigo-600]="activeTab === 'view-report'" [class.text-gray-500]="activeTab !== 'view-report'" [class.border-transparent]="activeTab !== 'view-report'" (click)="switchTab('view-report')">Audit Report</button>
                     </nav>
@@ -32,159 +34,7 @@
                 <div class="pt-6">
                     <!-- Assessment Tab -->
                     <div id="view-assessment" class="view-tab-content" [class.hidden]="activeTab !== 'view-assessment'">
-                        <div class="bg-transparent">
-                            <div class="p-4 bg-white rounded-t-xl border-b sticky top-[128px] z-10">
-                                <nav class="flex space-x-4" id="assessment-phase-tabs">
-                                    <button class="assessment-phase-btn font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 px-2" data-phase="onsite">Onsite Assessment</button>
-                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="offsite">Offsite Assessment</button>
-                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="self">Self Assessment</button>
-                                </nav>
-                            </div>
-
-                            <div id="assessment-phases-container">
-                                <!-- Onsite Phase -->
-                                <div class="assessment-phase active" id="phase-onsite">
-                                    <div class="flex flex-col md:flex-row gap-8">
-                                        <!-- Left Sidebar Navigation -->
-                                        <aside class="w-full md:w-1/4 lg:w-1/5 md:sticky md:top-48 md:self-start pt-6">
-                                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Chapters</h3>
-                                            <nav id="chapter-nav" class="space-y-1">
-                                                <a *ngFor="let chapter of objectKeys(auditQuestions); let i = index" [href]="'#chapter-' + (i + 1)" class="chapter-tile active group block p-3 rounded-lg hover:bg-gray-50">
-                                                    <div class="flex justify-between items-center">
-                                                        <span class="font-semibold text-gray-800 text-sm">{{ auditQuestions[chapter].title }}</span>
-                                                        <div class="relative inline-block text-left">
-                                                            <select class="quick-apply-score text-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                                                                <option value="">Quick Apply</option>
-                                                                <option value="3">Score: 3</option>
-                                                                <option value="2">Score: 2</option>
-                                                                <option value="1">Score: 1</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
-                                                        <span class="progress-text font-medium">0/5 Qs</span>
-                                                        <div class="flex items-center gap-2">
-                                                            <span class="checkpoint-tile-indicator hidden" title="Contains Stopping Parameter Checkpoints"><i class="fas fa-shield-alt text-amber-500"></i></span>
-                                                            <span class="critical-failures-count font-medium text-red-600 hidden">Failures: <b>0</b></span>
-                                                            <span class="flag-count hidden" title="Flagged Questions"><i class="fas fa-flag text-blue-500"></i> <b>0</b></span>
-                                                            <span class="findings-count">Findings: <b>0</b></span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
-                                                        <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
-                                                    </div>
-                                                </a>
-                                            </nav>
-                                        </aside>
-
-                                        <!-- Right Content Area -->
-                                        <div class="w-full md:w-3/4 lg:w-4/5 pt-6" id="assessment-content">
-
-                                            <!-- Critical Failures Summary -->
-                                            <div id="critical-summary-section" class="mb-6 p-4 rounded-lg bg-red-100 border border-red-200 hidden">
-                                                <div class="flex items-center">
-                                                    <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-4"></i>
-                                                    <div>
-                                                        <h3 class="font-bold text-red-800">Critical Failures Detected</h3>
-                                                        <p class="text-sm text-red-700">The following stopping parameter checkpoints have failed. Please review immediately.</p>
-                                                    </div>
-                                                </div>
-                                                <div id="critical-summary-list" class="mt-4 space-y-2">
-                                                    <!-- Dynamic content will be inserted here -->
-                                                </div>
-                                            </div>
-
-                                            <div *ngFor="let chapterKey of objectKeys(auditQuestions); let i = index" [id]="'chapter-' + (i + 1)" class="chapter-section space-y-4 pt-8">
-                                                <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">{{ auditQuestions[chapterKey].title }}</h3>
-                                                <div *ngFor="let question of auditQuestions[chapterKey].questions; let j = index"
-                                                     class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-                                                     [attr.data-question-id]="'q' + (i + 1) + '.' + (j + 1)"
-                                                     [attr.data-question-text]="question.text"
-                                                     [attr.data-is-checkpoint]="question.isCheckpoint"
-                                                     [attr.data-min-score]="question.minScore"
-                                                     data-flagged="false">
-                                                  <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
-                                                    <h4 class="font-semibold text-gray-800 pr-4 flex items-center">
-                                                      <span *ngIf="question.isCheckpoint" class="checkpoint-indicator" title="Stopping Parameter Checkpoint">
-                                                        <i class="fas fa-shield-alt text-amber-500 mr-2"></i>
-                                                      </span>
-                                                      {{ i + 1 }}.{{ j + 1 }} - {{ question.text }}
-                                                    </h4>
-                                                    <div class="flex items-center gap-4">
-                                                      <i class="fas fa-flag flag-icon text-gray-300 hover:text-blue-500 cursor-pointer" title="Flag for follow-up"></i>
-                                                      <span class="score-pill text-sm font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full whitespace-nowrap">
-                                                        Score: <b class="score-display text-gray-700 font-bold">N/A</b>
-                                                      </span>
-                                                    </div>
-                                                  </div>
-                                                  <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                                    <div class="space-y-4">
-                                                      <div class="grid grid-cols-2 gap-6">
-                                                        <div>
-                                                          <label class="text-sm font-semibold text-gray-700">Supplier Score</label>
-                                                          <div class="mt-2 space-y-2">
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> None (3)
-                                                            </label>
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> Low (2)
-                                                            </label>
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> High (1)
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                        <div>
-                                                          <label class="text-sm font-semibold text-gray-700">Auditor Score</label>
-                                                          <div class="mt-2 space-y-2">
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> None (3)
-                                                            </label>
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> Low (2)
-                                                            </label>
-                                                            <label class="flex items-center text-sm cursor-pointer">
-                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2"> High (1)
-                                                            </label>
-                                                          </div>
-                                                        </div>
-                                                      </div>
-                                                      <div>
-                                                        <label class="text-sm font-semibold text-gray-700">Supplier Comments</label>
-                                                        <textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea>
-                                                      </div>
-                                                      <div>
-                                                        <label class="text-sm font-semibold text-gray-700 flex items-center justify-between">
-                                                          <span>Auditor Comments</span>
-                                                          <span class="text-gray-400 space-x-3">
-                                                            <i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i>
-                                                            <i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i>
-                                                          </span>
-                                                        </label>
-                                                        <textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments..."></textarea>
-                                                      </div>
-                                                    </div>
-                                                    <div>
-                                                      <h5 class="font-semibold text-gray-800 mb-2">Findings</h5>
-                                                      <div class="findings-content border rounded-lg p-3 bg-gray-50/50 min-h-[150px] space-y-2">
-                                                          <div class="text-center text-sm text-gray-500 py-4">No findings yet.</div>
-                                                      </div>
-                                                      <button class="add-finding-btn mt-3 text-sm text-indigo-600 font-semibold hover:underline">
-                                                        <i class="fas fa-plus-circle mr-1"></i> Add Finding
-                                                      </button>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Score and Details Tab -->
-                    <div id="view-score-details" class="view-tab-content" [class.hidden]="activeTab !== 'view-score-details'">
-                       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm text-center">
                                 <h3 class="font-semibold text-lg mb-4">Overall Score</h3>
                                 <div class="relative w-48 h-48 mx-auto">
@@ -212,6 +62,211 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                        <div class="bg-transparent">
+                            <div class="p-4 bg-white rounded-t-xl border-b sticky top-[128px] z-10">
+                                <nav class="flex space-x-4" id="assessment-phase-tabs">
+                                    <button class="assessment-phase-btn font-semibold text-indigo-600 border-b-2 border-indigo-600 pb-2 px-2" data-phase="onsite">Onsite Assessment</button>
+                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="offsite">Offsite Assessment</button>
+                                    <button class="assessment-phase-btn font-semibold text-gray-500 border-b-2 border-transparent pb-2 px-2" data-phase="self">Self Assessment</button>
+                                    <a href="#findings-section" class="ml-auto font-semibold text-indigo-600 pb-2 px-2">Go to Findings</a>
+                                </nav>
+                            </div>
+
+                            <div id="assessment-phases-container">
+                                <!-- Onsite Phase -->
+                                <div class="assessment-phase active" id="phase-onsite">
+                                    <div class="flex flex-col md:flex-row gap-8">
+                                        <!-- Left Sidebar Navigation -->
+                                        <aside class="w-full md:w-1/4 lg:w-1/5 md:sticky md:top-48 md:self-start pt-6">
+                                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 px-3">Chapters</h3>
+                                            <nav id="chapter-nav" class="space-y-1">
+                                                <a *ngFor="let chapterKey of objectKeys(auditQuestions); let i = index" [href]="'#chapter-' + (i + 1)" class="chapter-tile group block p-3 rounded-lg" [ngClass]="getChapterColorClass(chapterKey)">
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="font-semibold text-gray-800 text-sm">{{ auditQuestions[chapterKey].title }}</span>
+                                                        <div class="relative inline-block text-left">
+                                                            <select #bulkScoreSelect class="quick-apply-score text-xs rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" (change)="applyBulkScore(chapterKey, bulkScoreSelect.value)">
+                                                                <option value="">Quick Apply</option>
+                                                                <option value="3">Score: 3</option>
+                                                                <option value="2">Score: 2</option>
+                                                                <option value="1">Score: 1</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="flex justify-between items-center mt-2 text-xs text-gray-500">
+                                                        <span class="progress-text font-medium">0/5 Qs</span>
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="stopping-parameter-tile-indicator hidden" title="Contains Stopping Parameters"><i class="fas fa-shield-alt text-amber-500"></i></span>
+                                                            <span class="critical-failures-count font-medium text-red-600 hidden">Failures: <b>0</b></span>
+                                                            <span class="flag-count hidden" title="Flagged Questions"><i class="fas fa-flag text-blue-500"></i> <b>0</b></span>
+                                                            <span class="findings-count">Findings: <b>0</b></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="w-full bg-gray-200 rounded-full h-1 mt-2">
+                                                        <div class="progress-bar bg-indigo-500 h-1 rounded-full" style="width: 0%;"></div>
+                                                    </div>
+                                                </a>
+                                            </nav>
+                                        </aside>
+
+                                        <!-- Right Content Area -->
+                                        <div class="w-full md:w-3/4 lg:w-4/5 pt-6" id="assessment-content">
+
+                                            <!-- Critical Failures Summary -->
+                                            <div id="critical-summary-section" class="mb-6 p-4 rounded-lg bg-red-100 border border-red-200 hidden">
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-4"></i>
+                                                    <div>
+                                                        <h3 class="font-bold text-red-800">Critical Failures Detected</h3>
+                                                         <p class="text-sm text-red-700">The following stopping parameters have failed. Please review immediately.</p>
+                                                    </div>
+                                                </div>
+                                                <div id="critical-summary-list" class="mt-4 space-y-2">
+                                                    <!-- Dynamic content will be inserted here -->
+                                                </div>
+                                            </div>
+
+                                            <div *ngFor="let chapterKey of objectKeys(auditQuestions); let i = index" [id]="'chapter-' + (i + 1)" class="chapter-section space-y-4 pt-8">
+                                                <h3 class="text-2xl font-bold text-gray-900 pb-3 border-b">{{ auditQuestions[chapterKey].title }}</h3>
+                                                <div *ngFor="let question of auditQuestions[chapterKey].questions; let j = index"
+                                                     class="question-container bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                                                     [attr.data-question-id]="'q' + (i + 1) + '.' + (j + 1)"
+                                                     [attr.data-question-text]="question.text"
+                                                     [attr.data-is-stopping-parameter]="question.isCheckpoint"
+                                                     [attr.data-min-score]="question.minScore"
+                                                     data-flagged="false">
+                                                  <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer" (click)="toggleQuestion('q' + (i + 1) + '.' + (j + 1))">
+                                                    <h4 class="font-semibold text-gray-800 pr-4 flex items-center">
+                                                      <span *ngIf="question.isCheckpoint" class="stopping-parameter-indicator" title="Stopping Parameter">
+                                                        <i class="fas fa-shield-alt text-amber-500 mr-2"></i>
+                                                      </span>
+                                                      {{ i + 1 }}.{{ j + 1 }} - {{ question.text }}
+                                                    </h4>
+                                                    <div class="flex items-center gap-4">
+                                                      <i class="fas fa-flag flag-icon text-gray-300 hover:text-blue-500 cursor-pointer" title="Flag for follow-up"></i>
+                                                      <div class="inline-flex rounded-md shadow-sm" role="group" (click)="$event.stopPropagation()">
+                                                        <button type="button" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-indigo-500" [class.bg-indigo-100]="getScore('q' + (i + 1) + '.' + (j + 1)) === 3" (click)="updateScore('q' + (i + 1) + '.' + (j + 1), 3)">
+                                                          3
+                                                        </button>
+                                                        <button type="button" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border-t border-b border-gray-300 hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-indigo-500" [class.bg-indigo-100]="getScore('q' + (i + 1) + '.' + (j + 1)) === 2" (click)="updateScore('q' + (i + 1) + '.' + (j + 1), 2)">
+                                                          2
+                                                        </button>
+                                                        <button type="button" class="px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-r-md hover:bg-gray-50 focus:z-10 focus:ring-2 focus:ring-indigo-500" [class.bg-indigo-100]="getScore('q' + (i + 1) + '.' + (j + 1)) === 1" (click)="updateScore('q' + (i + 1) + '.' + (j + 1), 1)">
+                                                          1
+                                                        </button>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                  <div class="p-4 grid grid-cols-1 lg:grid-cols-2 gap-6" [class.hidden]="!isQuestionOpen('q' + (i + 1) + '.' + (j + 1))">
+                                                    <div class="space-y-4">
+                                                      <div class="grid grid-cols-2 gap-6">
+                                                        <div>
+                                                          <label class="text-sm font-semibold text-gray-700">Supplier Score</label>
+                                                          <div class="mt-2 space-y-2">
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2">
+                                                              Score 3
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[3]"></i>
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2">
+                                                              Score 2
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[2]"></i>
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_supplier_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2">
+                                                              Score 1
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[1]"></i>
+                                                            </label>
+                                                          </div>
+                                                        </div>
+                                                        <div>
+                                                          <label class="text-sm font-semibold text-gray-700">Auditor Score</label>
+                                                          <div class="mt-2 space-y-2">
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="3" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" [checked]="getScore('q' + (i + 1) + '.' + (j + 1)) === 3" (change)="updateScore('q' + (i + 1) + '.' + (j + 1), 3)">
+                                                              Score 3
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[3]"></i>
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="2" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" [checked]="getScore('q' + (i + 1) + '.' + (j + 1)) === 2" (change)="updateScore('q' + (i + 1) + '.' + (j + 1), 2)">
+                                                              Score 2
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[2]"></i>
+                                                            </label>
+                                                            <label class="flex items-center text-sm cursor-pointer">
+                                                              <input type="radio" [name]="'q' + (i + 1) + '.' + (j + 1) + '_score'" value="1" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500 mr-2" [checked]="getScore('q' + (i + 1) + '.' + (j + 1)) === 1" (change)="updateScore('q' + (i + 1) + '.' + (j + 1), 1)">
+                                                              Score 1
+                                                              <i class="fas fa-info-circle text-gray-400 ml-2" [title]="scoreDescriptions[1]"></i>
+                                                            </label>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                      <div>
+                                                        <label class="text-sm font-semibold text-gray-700">Supplier Comments</label>
+                                                        <textarea class="w-full mt-1 p-2 border rounded-md text-sm bg-gray-50" rows="2" placeholder="No comments from supplier." readonly></textarea>
+                                                      </div>
+                                                      <div>
+                                                        <label class="text-sm font-semibold text-gray-700 flex items-center justify-between">
+                                                          <span>Auditor Comments</span>
+                                                          <span class="text-gray-400 space-x-3">
+                                                            <i class="fas fa-paperclip cursor-pointer hover:text-indigo-600"></i>
+                                                            <i class="fas fa-microphone cursor-pointer hover:text-indigo-600"></i>
+                                                          </span>
+                                                        </label>
+                                                        <textarea class="auditor-comment w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="2" placeholder="Add auditor comments..."></textarea>
+                                                      </div>
+                                                    </div>
+                                                    <div>
+                                                        <!-- Findings are now displayed in a dedicated section at the bottom -->
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="findings-section" class="mt-8">
+                                <h2 class="text-2xl font-bold text-gray-900 mb-4">Findings</h2>
+                                <div class="space-y-2">
+                                    <div *ngFor="let finding of allFindings; let i = index" class="finding-item bg-white border border-gray-200 rounded-md">
+                                        <div class="finding-header p-2 cursor-pointer grid grid-cols-12 gap-x-2 items-center text-xs" (click)="toggleFinding('finding-' + i)">
+                                            <div class="col-span-12 text-sm font-semibold">{{ getFirstLine(finding.description) }}</div>
+                                            <div class="col-span-1 font-semibold"><span>{{ finding.questionId }}</span></div>
+                                            <div class="col-span-2"><span class="font-medium text-gray-700">{{ finding.ownership }}</span></div>
+                                            <div class="col-span-2"><span class="text-gray-600">{{ finding.correctiveAction }}</span></div>
+                                            <div class="col-span-1 text-center"><span class="font-bold">{{ finding.initialScore }}</span></div>
+                                            <div class="col-span-1 text-center"><span class="font-bold">{{ finding.updatedScore }}</span></div>
+                                            <div class="col-span-1 text-center"><span class="font-medium" [ngClass]="{'text-red-600': finding.stoppingParameter === 'Y', 'text-gray-500': finding.stoppingParameter !== 'Y'}">{{finding.stoppingParameter}}</span></div>
+                                            <div class="col-span-1 text-center"><span class="text-gray-600">{{ finding.targetDate }}</span></div>
+                                            <div class="col-span-1 text-center"><span class="text-gray-600">{{ finding.followUpDate }}</span></div>
+                                            <div class="col-span-2" (click)="$event.stopPropagation()">
+                                                <select class="w-full text-xs rounded-md border-gray-300 shadow-sm" [(ngModel)]="finding.status">
+                                                    <option>Open</option>
+                                                    <option>Closed</option>
+                                                    <option>In Progress</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="finding-body p-3 border-t" [class.hidden]="!isFindingOpen('finding-' + i)">
+                                            <div class="relative">
+                                                <div [class.truncate]="isDescriptionTruncated('finding-' + i, finding.description)">
+                                                    <textarea class="w-full mt-1 p-2 border rounded-md text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" rows="3" placeholder="Describe the finding..." [(ngModel)]="finding.description" maxlength="250"></textarea>
+                                                </div>
+                                                <div class="text-xs text-right text-gray-400 mt-1">{{finding.description.length || 0}}/250</div>
+                                                <button *ngIf="finding.description.length > 100" class="text-xs text-indigo-600 font-semibold hover:underline mt-1" (click)="toggleDescription('finding-' + i)">
+                                                    {{ isDescriptionExpanded['finding-' + i] ? 'Collapse' : 'Expand' }}
+                                                </button>
+                                            </div>
+                                            <div *ngIf="finding.attachment" class="mt-2">
+                                                <a href="#" class="text-xs text-indigo-600 font-semibold hover:underline">
+                                                    <i class="fas fa-paperclip mr-1"></i> View Attachment ({{ finding.attachment }})
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
