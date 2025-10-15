@@ -78,7 +78,7 @@ body {
     background-color: #fee2e2;
 }
 
-.checkpoint-indicator {
+.stopping-parameter-indicator {
     display: inline-flex;
     align-items: center;
     justify-content: center;
